@@ -8,6 +8,7 @@ describe('Expression system', it => {
       add: parseExpr('3 + 2'),
       sub: parseExpr('3 - 2'),
       mul: parseExpr('3 * 2'),
+      mulX: parseExpr('3 x 2'),
       div: parseExpr('3 / 2'),
       mod: parseExpr('3 % 2'),
       pow: parseExpr('3 ^ 2'),
@@ -17,7 +18,8 @@ describe('Expression system', it => {
     assert.equal(exprs.const.toString(), '3', 'const parse')
     assert.equal(exprs.add.toString(), '3 + 2', 'add parse')
     assert.equal(exprs.sub.toString(), '3 - 2', 'sub parse')
-    assert.equal(exprs.mul.toString(), '3 * 2', 'mul parse')
+    assert.equal(exprs.mul.toString(), '3 * 2', 'mul parse *')
+    assert.equal(exprs.mulX.toString(), '3 * 2', 'mul parse x')
     assert.equal(exprs.div.toString(), '3 / 2', 'div parse')
     assert.equal(exprs.mod.toString(), '3 % 2', 'mod parse')
     assert.equal(exprs.pow.toString(), '3 ^ 2', 'pow parse')
@@ -26,7 +28,8 @@ describe('Expression system', it => {
     assert.equal(exprs.const.eval().value, 3, 'const eval')
     assert.equal(exprs.add.eval().value, 5, 'add eval')
     assert.equal(exprs.sub.eval().value, 1, 'sub eval')
-    assert.equal(exprs.mul.eval().value, 6, 'mul eval')
+    assert.equal(exprs.mul.eval().value, 6, 'mul eval *')
+    assert.equal(exprs.mulX.eval().value, 6, 'mul eval x')
     assert.equal(exprs.div.eval().value, 1, 'div eval')
     assert.equal(exprs.mod.eval().value, 1, 'mod eval')
     assert.equal(exprs.pow.eval().value, 9, 'pow eval')

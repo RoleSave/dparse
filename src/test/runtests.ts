@@ -9,7 +9,7 @@ function runTests(exitOnFail: boolean = false) {
   if(!fs.existsSync('./'+testPath))
     fs.mkdirSync('./'+testPath, { recursive: true })
   for(let file of fs.readdirSync('./'+testPath))
-    require('../../'+testPath+file)
+    if(!file.endsWith('.d.ts')) require('../../'+testPath+file)
 
   if(testsFailed) {
     console.log()
