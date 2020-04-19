@@ -1,0 +1,29 @@
+{
+  "name": "dparse",
+  "version": "1.0.0",
+  "description": "A dice notation parser and evaluator.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node lib/test/runtests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RoleSave/dparse.git"
+  },
+  "keywords": [
+    "dice",
+    "dice notation",
+    "d&d",
+    "dungeons and dragons"
+  ],
+  "author": "Katrina Scialdone",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/RoleSave/dparse/issues"
+  },
+  "homepage": "https://github.com/RoleSave/dparse#readme",
+  "devDependencies": {
+    "@types/node": "^13.13.0",
+    "typescript": "^3.8.3"
+  }
+}
