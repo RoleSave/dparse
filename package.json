@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "node lib/test/runtests.js"
+    "test": "node lib/test/runtests.js",
+    "prepare": "tsc --build && npm test"
   },
   "repository": {
     "type": "git",

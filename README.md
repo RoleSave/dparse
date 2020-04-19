@@ -2,12 +2,11 @@
 A Typescript dice notation parser and evaluator. Originally created for my Discord dice bot, Rockfall, before being separated out into its own library.
 
 ## Installation
-Installation through NPM will be available soon. For now, you can build and install the library manually.
+Run the following command to install this library:
 
-1. Clone the Github repository.
-2. Run `npm pack` in the project directory to generate a tarball (`.tgz`).
-3. Navigate to the project in which you want to install the library.
-4. Run `npm install <path>` with the path to the generated tarball.
+```
+npm install dparse
+```
 
 ## Supported Syntax
 
