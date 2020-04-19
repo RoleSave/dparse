@@ -1,12 +1,10 @@
 import { DiceResult } from "./dice"
 import { randInt, fn } from "../util"
 
-export class Result {
-  constructor(
-    readonly source: Expr,
-    readonly value: number, 
-    readonly rolls: DiceResult[] = []
-  ) {}
+export type Result = {
+  source: Expr,
+  value: number, 
+  rolls: DiceResult[]
 }
 
 export abstract class Expr {
@@ -20,20 +18,18 @@ export abstract class Expr {
 
   protected abstract performEval(): Result
   abstract toString(): string
-  parenthesize() { return `(${this})`}
 }
 
 export class Const extends Expr {
   constructor(readonly value: number) {super(true)}
-  protected performEval(): Result { return new Result(this, this.value) }
+  protected performEval(): Result { return { source: this, value: this.value, rolls: [] } }
   toString() { return this.value.toString() }
-  parenthesize() { return this.toString() }
 }
 
 export class Group extends Expr {
   constructor(readonly contains: Expr) {super(contains.cacheable)}
   protected performEval(): Result { return this.contains.eval() }
-  toString() { return this.contains.parenthesize() }
+  toString() { return `(${this.contains})` }
 }
 
 export abstract class BinOp extends Expr {
@@ -47,7 +43,7 @@ export abstract class BinOp extends Expr {
   toString() { return `${this.lhs} ${this.text} ${this.rhs}`}
   protected performEval(): Result {
     let lhs = this.lhs.eval(), rhs = this.rhs.eval()
-    return new Result(this, this.f(lhs.value, rhs.value), [...lhs.rolls, ...rhs.rolls])
+    return { source: this, value: this.f(lhs.value, rhs.value), rolls: [...lhs.rolls||[], ...rhs.rolls||[]] }
   }
 }
 
@@ -68,7 +64,7 @@ export class RandomFromList extends Expr {
   toString() { return this.strRep || `random[${this.list.join(',')}]` }
   protected performEval(): Result {
     let index = randInt(this.list.length),
-        result = new Result(this, this.list[index], [])
+        result = { source: this, value: this.list[index], rolls: [] }
     if(this.removeSelected) 
       this.list.splice(index, 1)
     return result

@@ -21,7 +21,7 @@ export abstract class Dice extends Expr {
   protected performEval(): Result {
     let dr = this.roll()
     for(let fn of this.functions) dr = fn.apply(dr)
-    return new Result(this, dr.total, [dr])
+    return { source: this, value: dr.total, rolls: [dr] }
   }
 
   addFn(...fn: DiceFn[]) { this.functions.push(...fn); return this }
