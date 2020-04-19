@@ -3,9 +3,10 @@ import { failTests } from './runtests'
 
 const failMark = '\u001B[1;31m✗\u001B[0m'
 const succMark = '\u001B[1;32m✓\u001B[0m'
+const todoMark = '\u001B[1;33m!\u001B[0m'
 
 type AssertCtx = (true|string)[]
-type DescribeBody = (it: (text: string, body: ItBody) => void) => void
+type DescribeBody = (it: (text: string, body: ItBody) => void, todo: (text: string) => void) => void
 type ItBody = (assert: ReturnType<typeof buildAssert>) => void
 
 export function describe(name: string, body: DescribeBody) {
@@ -24,6 +25,8 @@ export function describe(name: string, body: DescribeBody) {
         console.log(indent(res, 6))
       }
     }
+  }, function todo(text: string) {
+    console.log(`  ${todoMark} ${text}\n      \u001B[1;33mTODO:\u001B[0m Implement test`)
   })
 }
 
