@@ -1,5 +1,5 @@
 import { Expr, Result, Const } from "./expr"
-import { randInt, randComp, fn, arrayOf } from "../util"
+import { randInt, randComp, fn, arrayOf } from "../util/functions"
 
 export type DiceResult = {
   rolls: number[]

@@ -1,6 +1,6 @@
 import { Expr, Const } from "../core/expr"
 import { DiceResult, DiceFn } from "../core/dice"
-import { removeLowest, removeHighest, fn } from "../util"
+import { removeLowest, removeHighest, fn } from "../util/functions"
 
 export function KeepHigh(num: Expr|number) { 
   return new (class KeepHigh extends DiceFn {

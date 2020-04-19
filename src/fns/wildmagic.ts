@@ -1,5 +1,5 @@
 import { DiceFn, DiceResult } from "../core/dice";
-import { randInt } from "../util";
+import { randInt } from "../util/functions";
 import { parseExpr } from "../core/parse";
 
 export const WildMagic = new (class WildMagic extends DiceFn {

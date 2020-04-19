@@ -1,4 +1,4 @@
-import { indent, fn } from '../util'
+import { indent, fn } from '../util/functions'
 import { failTests } from './runtests'
 
 const failMark = '\u001B[1;31m✗\u001B[0m'

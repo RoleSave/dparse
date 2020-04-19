@@ -1,5 +1,5 @@
 import { DiceResult } from "./dice"
-import { randInt, fn } from "../util"
+import { randInt, fn } from "../util/functions"
 
 export type Result = {
   source: Expr,

@@ -1,6 +1,6 @@
 import { DiceResult, DiceFn } from "../core/dice"
 import { Expr, Const } from "../core/expr"
-import { fn } from "../util"
+import { fn } from "../util/functions"
 
 export const Explode = new (class Explode extends DiceFn {
   apply(result: DiceResult, depth: number = 0): DiceResult {
