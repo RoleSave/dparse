@@ -96,7 +96,7 @@ export class FateDice extends Dice {
 export class ExprDice extends Dice {
   constructor(readonly base: Expr, functions: DiceFn[] = []) { super(functions) }
   toString() { return this.base.toString() }
-  roll() { 
+  roll(): DiceResult { 
     let result = this.base.eval()
     return {
       rolls: [],

@@ -1,6 +1,6 @@
 import { Expr, Const, AddOp, SubOp, MulOp, DivOp, ModOp, PowOp, Group } from "./expr";
 import { BasicDice, FateDice, Dice, ExprDice, DiceFn } from "./dice";
-import { Explode, Advantage, Disadvantage, DifficultyClass } from "../fns/standard";
+import { Explode, Advantage, Disadvantage, DifficultyClass } from "../fns/core";
 import { KeepHigh, KeepLow, KeepAbove, KeepBelow } from "../fns/keep";
 import { RerollHigh, RerollLow, RerollAbove, RerollBelow, RerollBelowRecursive, RerollAboveRecursive } from "../fns/reroll";
 import { WildMagic } from "../fns/wildmagic";

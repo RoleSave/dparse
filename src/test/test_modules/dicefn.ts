@@ -1,7 +1,7 @@
 import { describe, testConsistency } from "../testcore";
 import { wildMagicEffects, WildMagic } from "../../fns/wildmagic";
 import { BasicDice } from "../../core/dice";
-import { Explode, Advantage, Disadvantage, DifficultyClass } from "../../fns/standard";
+import { Explode, Advantage, Disadvantage, DifficultyClass } from "../../fns/core";
 import { KeepHigh, KeepLow, KeepAbove, KeepBelow } from "../../fns/keep";
 import { RerollAbove, RerollBelow, RerollAboveRecursive, RerollBelowRecursive } from "../../fns/reroll";
 

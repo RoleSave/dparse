@@ -2,7 +2,8 @@
   "name": "dparse",
   "version": "1.0.0",
   "description": "A dice notation parser and evaluator.",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "node lib/test/runtests.js"
   },
