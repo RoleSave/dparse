@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "npm explore gruetest -- npm test -- lib/test",
+    "test": "tsc --build && npm explore gruetest -- npm test -- ./lib/test",
     "prepack": "rmdir /s /q lib && tsc --build && npm test"
   },
   "repository": {
