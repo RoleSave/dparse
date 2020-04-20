@@ -20,7 +20,7 @@ The core of `dparse`'s functionality comes from two functions: `parseExpr` and `
 
 **Subsequent calls to `Expr#eval()` are not guaranteed to return equivalent `Result` instances.** Since dice are inherently random, any expression involving dice may return a different `Result#value`.
 
-You can also add your own custom dice types, dice functions, and operators with the `registerOp` function.
+You can also add your own custom dice types, dice functions, and operators with the `Operators.registerOp` function.
 
 ## Supported Syntax
 `dparse` supports most basic mathematical and dice notation out of the box. It is built around a full expression parser with extensions for dice notation, and as such can handle essentially any combination of the below by simply performing mathematical operations on the results of rolls, as opposed to the strict `NdS+M` format that many dice calculators use. All syntax is case- and whitespace-insensitive except for variable names.
