@@ -1,142 +1,74 @@
-import { Expr, Const, AddOp, SubOp, MulOp, DivOp, ModOp, PowOp, Group } from "./expr";
-import { BasicDice, FateDice, Dice, ExprDice, DiceFn } from "./dice";
-import { Explode, Advantage, Disadvantage, DifficultyClass } from "../fns/core";
-import { KeepHigh, KeepLow, KeepAbove, KeepBelow } from "../fns/keep";
-import { RerollHigh, RerollLow, RerollAbove, RerollBelow, RerollBelowRecursive, RerollAboveRecursive } from "../fns/reroll";
-import { WildMagic } from "../fns/wildmagic";
+import { Expr, Group, Const, Variable } from "./expressions";
+import { Operators as Ops, PostOp, PostOpDef, BinOpDef, BinOp, OpDef } from './operators'
+
+/// SECTION: Definitions
 
 type Token = {
-  type: TokenType[]
+  type: 'const'|'var'|'open'|'close'|'group'|'op'
   text: string
+  opdef?: OpDef
   bound?: Token[]
 }
 
-type TokenType = 
-    'const'
-  | 'open' 
-  | 'close'
-  | 'group'
-  | 'expr'
-  | 'binop'
-    | 'op.add'
-    | 'op.sub'
-    | 'op.mul'
-    | 'op.div'
-    | 'op.mod'
-    | 'op.pow'
-  | 'postop'
-  | 'die'
-    | 'die.basic'
-    | 'die.fate'
-  | 'fn'
-    | 'fn.explode'
-    | 'fn.advantage'
-    | 'fn.disadvantage'
-    | 'fn.difficultyclass'
-    | 'fn.keephigh'
-    | 'fn.keeplow'
-    | 'fn.keepabove'
-    | 'fn.keepbelow'
-    | 'fn.rerollhigh'
-    | 'fn.rerolllow'
-    | 'fn.rerollabove'
-    | 'fn.rerollaboverec'
-    | 'fn.rerollbelow'
-    | 'fn.rerollbelowrec'
-    | 'fn.wildmagic'
-
-export function parseExprList(diceNotation: string): Expr[] {
-  return diceNotation.split(',').filter(x=>x.trim()).map(parseExpr)
+/** Parse a single expression. */
+export function parseExpr(expr: string): Expr {
+  return convert(collapse(lex(expr)))
 }
 
-export function parseExpr(diceNotation: string): Expr {
-  return convert(collapse(lex(diceNotation)))
+/** Parse a comma-separated list of expressions. */
+export function parseExprList(exprs: string): Expr[] {
+  return exprs.split(',').filter(x=>x.trim()).map(parseExpr)
 }
 
-/// SECTION: Lex linear text into discrete tokens
-function lex(diceNotation: string): Token[] {
+/// SECTION: Lex
+function lex(expr: string): Token[] {
   let tokens: Token[] = [],
-      from = diceNotation.toLowerCase(),
+      from = expr.toLowerCase(),
       c: string
-  
+
   lex: while(c = from[0]) {
     from = from.slice(1)
     if(/\s/.test(c)) continue lex
 
-    // Individual character operators
-    switch(c) {
-      case '(': tokens.push({ type: ['open'], text: c }); continue lex
-      case ')': tokens.push({ type: ['close'], text: c }); continue lex
-      case '!': tokens.push({ type: ['postop', 'fn'], text: '!' }); continue lex
-      case '+': case '-': 
-      case '*': case '/': case 'x':
-      case '%': case '^': 
-        tokens.push({ type: ['binop'], text: c })
-        continue lex
-    }
+    if(c === '(') { // TODO: /[\(\[\{]/.test(c)
+      tokens.push({ type: 'open', text: c })
+      continue lex }
+    if(c === ')') { // TODO: /[\)\]\}]/.test(c)
+      tokens.push({ type: 'close', text: c })
+      continue lex }
 
-    // Constants
     if(/\d/.test(c)) {
       let num = (c+from).match(/(^\d+)/)![1]
       from = from.slice(num.length-1)
-      tokens.push({ type: ['const'], text: num })
+      tokens.push({ type: 'const', text: num })
       continue lex
     }
 
-    // Set-length operators
-    let s: string
-    switch(s = (c+from).slice(0,3)) {
-      case 'adv': case 'dis':
-        from = from.slice(2)
-        tokens.push({ type: ['postop', 'fn'], text: s })
-        continue lex
-
-      case 'r!>': case 'r!<':
-        from = from.slice(2)
-        tokens.push({ type: ['binop', 'fn'], text: s })
-        continue lex
-    }
-
-    switch(s = (c+from).slice(0,2)) {
-      case 'dc':
-      case 'kh': case 'kl':
-      case 'k>': case 'k<':
-      case 'rh': case 'rl':
-      case 'r>': case 'r<':
-        from = from.slice(1)
-        tokens.push({ type: ['binop', 'fn'], text: s })
-        continue lex
-
-      case 'wm':
-        from = from.slice(1)
-        tokens.push({ type: ['postop', 'fn'], text: s })
-        continue lex
-      
-      case 'df':
-        from = from.slice(1)
-        tokens.push({ type: ['postop', 'die'], text: s })
-        continue lex
-
-      case 'd%':
-        from = from.slice(1)
-        tokens.push({ type: ['binop', 'die'], text: 'd' }, { type: ['const'], text: '100' })
-        continue lex
-    }
-
-    // Basic dice (d)
-    if(c === 'd') {
-      tokens.push({ type: ['binop', 'die'], text: 'd' })
+    if(c === '$') {
+      let vname = from.match(/(^[a-z0-9_]+;?)/i)?.[1]
+      from = from.slice(vname?.length)
+      if(!vname) throw 'Expected variable name after $'
+      if(vname.endsWith(';')) vname = vname.slice(0,-1)
+      tokens.push({ type: 'var', text: vname })
       continue lex
+    }
+
+    for(let op of Ops.getOpList().sort((a,b) => b.text.length - a.text.length)) {
+      if((c+from).startsWith(op.text.toLowerCase())) {
+        from = from.slice(op.text.length-1)
+        tokens.push({ type: 'op', text: op.text, opdef: op })
+        continue lex
+      }
     }
 
     // Unknown character
-    throw `Unexpected token ${c} when parsing ${diceNotation}`
+    throw `Unexpected token ${c} when parsing ${expr}`
   }
 
   return tokens
 }
 
-/// SECTION: Collapse linear token list into a single AST token
+/// SECTION: Build AST
 function collapse(tokens: Token[]): Token {
   if(tokens.length < 1) throw `Cannot parse empty expression`
 
@@ -153,8 +85,8 @@ function collapse(tokens: Token[]): Token {
     let nest = 0, cont = [], open = ci
     advance()
     while(t = curr()) {
-      if(t.type.includes('open')) nest++
-      if(t.type.includes('close')) nest--
+      if(t.type == 'open' && t.text === tokens[open].text) nest++
+      if(t.type == 'close' && t.text === matchParen[tokens[open].text]) nest--
       if(nest < 0) break
       cont.push(t)
       advance()
@@ -163,179 +95,90 @@ function collapse(tokens: Token[]): Token {
 
     tokens = [
       ...tokens.slice(0, open), 
-      { type: ['group'], text: `(${cont.map(t=>t.text).join('')})`, bound: [collapse(cont)] }, 
+      { type: 'group', 
+        text: `(${cont.map(t=>t.text).join('')})`, 
+        bound: [collapse(cont)] }, 
       ...tokens.slice(ci)
     ]
     ci = open+1
   }
 
-  // Consume a binary operator
-  function collapseBinop(...type: TokenType[]) {
-    if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
-    if(!next()) throw `Expected right-hand argument to operator ${curr().text}`
-    tokens = [
-      ...tokens.slice(0, ci-1), 
-      { type: ['expr', ...type], text: prev().text+t.text+next().text, bound: [prev(), next()] }, 
-      ...tokens.slice(ci+2)
-    ]
-  }
-  
-  // Consume a postfix operator
-  function collapsePostop(...type: TokenType[]) {
-    if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
-    tokens = [
-      ...tokens.slice(0, ci-1), 
-      { type: ['expr', ...type], text: prev().text+t.text, bound: [prev()] }, 
-      ...tokens.slice(ci+1)
-    ]
-  }
-  
-  /// SECTION: Collapse stages
-
   // Parentheses
   while(t = curr()) {
-    if(t.type.includes('open')) consumeParens()
-    else if(t.type.includes('close')) throw `Unexpected token ) when parsing ${tokens.map(t=>t.text).join('')}`
+    if(t.type == 'open') consumeParens()
+    else if(t.type == 'close') throw `Unexpected token ) when parsing ${tokens.map(t=>t.text).join('')}`
     else advance()
   } reset()
 
-  // Dice
-  while(t = curr()) {
-    if(t.type.includes('die')) switch(t.text) {
-      case 'd': collapseBinop('die.basic', 'die'); break
-      case 'df': collapsePostop('die.fate', 'die'); break
-      default: advance()
-    } else advance()
-  } reset()
+  // Operators
 
-  // Dice functions
-  while(t = curr()) {
-    if(t.type.includes('fn')) switch(t.text) {
-      case '!': collapsePostop('fn.explode', 'die'); break
-      case 'adv': collapsePostop('fn.advantage', 'die'); break
-      case 'dis': collapsePostop('fn.disadvantage', 'die'); break
-      case 'wm': collapsePostop('fn.wildmagic', 'die'); break
-      case 'kh': collapseBinop('fn.keephigh', 'die'); break
-      case 'kl': collapseBinop('fn.keeplow', 'die'); break
-      case 'k>': collapseBinop('fn.keepabove', 'die'); break
-      case 'k<': collapseBinop('fn.keepbelow', 'die'); break
-      case 'rh': collapseBinop('fn.rerollhigh', 'die'); break
-      case 'rl': collapseBinop('fn.rerolllow', 'die'); break
-      case 'r>': collapseBinop('fn.rerollabove', 'die'); break
-      case 'r!>': collapseBinop('fn.rerollaboverec', 'die'); break
-      case 'r<': collapseBinop('fn.rerollbelow', 'die'); break
-      case 'r!<': collapseBinop('fn.rerollbelowrec', 'die'); break
-      default: advance()
-    } else advance()
-  } reset()
+  for(let prec = Ops.highestOpPrec; prec >= Ops.lowestOpPrec; prec--) {
+    while(t = curr()) {
+      if(t.type !== 'op') { advance(); continue }
 
-  // Exponentiative operations
-  while(t = curr()) {
-    if(t.type.includes('binop')) switch(t.text) {
-      case '^': collapseBinop('op.pow'); break
-      default: advance()
-    } else advance()
-  } reset()
+      let found = false
+      for(let op of Ops.getOpsForPrec(prec)) if(t.opdef?.name == op.name) {
+        found = true
+        switch(op.type) {
+          case 'postop': 
+            if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
+            tokens = [
+              ...tokens.slice(0, ci-1), 
+              { type: 'op', 
+                text: prev().text+t.text, 
+                bound: [prev()], 
+                opdef: t.opdef }, 
+              ...tokens.slice(ci+1)
+            ]
+            break
 
-  // Multiplicative operations
-  while(t = curr()) {
-    if(t.type.includes('binop')) switch(t.text) {
-      case '*': collapseBinop('op.mul'); break
-      case 'x': collapseBinop('op.mul'); break
-      case '/': collapseBinop('op.div'); break
-      case '%': collapseBinop('op.mod'); break
-      default: advance()
-    } else advance()
-  } reset()
+          case 'binop': 
+            if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
+            if(!next()) throw `Expected right-hand argument to operator ${curr().text}`
+            tokens = [
+              ...tokens.slice(0, ci-1), 
+              { type: 'op', 
+                text: prev().text+t.text+next().text, 
+                bound: [prev(), next()], 
+                opdef: t.opdef }, 
+              ...tokens.slice(ci+2)
+            ]
+            break
+        }
+      }
 
-  // Additive operations
-  while(t = curr()) {
-    if(t.type.includes('binop')) switch(t.text) {
-      case '+': collapseBinop('op.add'); break
-      case '-': collapseBinop('op.sub'); break
-      default: advance()
-    } else advance()
-  } reset()
-
-  // Late-binding functions
-  while(t = curr()) {
-    if(t.type.includes('fn')) switch(t.text) {
-      case 'dc': collapseBinop('fn.difficultyclass', 'die'); break
-      default: advance()
-    } else advance()
-  } reset()
+      if(!found) advance()
+    } reset()
+  }
 
   if(tokens.length > 1) throw `Could not reduce expression ${tokens.map(t=>t.text).join('')} to a single base node`
   return tokens[0]
 }
 
-/// SECTION: Convert an AST token into a processable Expr instance
+/// SECTION: Parse AST into expression
 function convert(ast: Token): Expr {
-  if(ast.type.includes('group')) return new Group(convert(ast.bound![0]))
-  if(ast.type.includes('const')) return new Const(parseInt(ast.text, 10))
+  if(ast.type == 'group') return new Group(convert(ast.bound![0]))
+  if(ast.type == 'const') return new Const(parseInt(ast.text, 10))
+  if(ast.type == 'var') return new Variable(ast.text)
 
-  const bindDiceFn = (get: DiceFn|((rhs: Expr) => DiceFn)): Expr => {
-    if(!ast.bound?.[0].type.includes('die')) throw `Cannot apply a dice function to something that isn't a die`
-    let over = convert(ast.bound[0]) as Dice
-
-    if(get instanceof DiceFn) return over.addFn(get)
-    else {
-      if(!ast.bound?.[1]) throw `Expected right-hand argument to operator ${ast.text}`
-      return over.addFn(get(convert(ast.bound[1])))
+  if(ast.type == 'op') {
+    if(!ast.bound?.length) throw `Encountered unbound operator ${ast.text}`
+    switch(ast.opdef!.type) {
+      case 'postop': 
+        if(ast.bound.length < 1) throw `Not enough tokens bound for operator ${ast.text}, expected 1`
+        return new PostOp(ast.opdef as PostOpDef, convert(ast.bound[0]))
+      case 'binop': 
+        if(ast.bound.length < 2) throw `Not enough tokens bound for operator ${ast.text}, expected 2`
+        return new BinOp(ast.opdef as BinOpDef, convert(ast.bound[0]), convert(ast.bound[1]))
     }
   }
 
-  const bindSpecialFn = (get: DiceFn|((rhs: Expr) => DiceFn)): Expr => {
-    if(!ast.bound) throw `Expected left-hand argument to operator ${ast.text}`
-    if(ast.bound?.[0].type.includes('die')) return bindDiceFn(get)
+  throw `Encounted unexpected token type ${ast.type.toUpperCase()}`
+}
 
-    let over = new ExprDice(convert(ast.bound[0]))
-    if(get instanceof DiceFn) return over.addFn(get)
-    else {
-      if(!ast.bound[1]) throw `Expected right-hand argument to operator ${ast.text}`
-      return over.addFn(get(convert(ast.bound[1])))
-    }
-  }
 
-  if(ast.type.includes('expr')) switch(ast.type[1]) {
-    case 'op.add': return new AddOp(convert(ast.bound![0]), convert(ast.bound![1]))
-    case 'op.sub': return new SubOp(convert(ast.bound![0]), convert(ast.bound![1]))
-    case 'op.mul': return new MulOp(convert(ast.bound![0]), convert(ast.bound![1]))
-    case 'op.div': return new DivOp(convert(ast.bound![0]), convert(ast.bound![1]))
-    case 'op.mod': return new ModOp(convert(ast.bound![0]), convert(ast.bound![1]))
-    case 'op.pow': return new PowOp(convert(ast.bound![0]), convert(ast.bound![1]))
-
-    case 'die.basic': return new BasicDice(convert(ast.bound![0]), convert(ast.bound![1]))
-    case 'die.fate': return new FateDice(convert(ast.bound![0]))
-
-    /// SECTION: Standard functions
-    case 'fn.explode': return bindDiceFn(Explode)
-    case 'fn.advantage': return bindDiceFn(Advantage)
-    case 'fn.disadvantage': return bindDiceFn(Disadvantage)
-      
-    /// SECTION: Keep functions
-    case 'fn.keephigh': return bindDiceFn(rhs => KeepHigh(rhs))
-    case 'fn.keeplow': return bindDiceFn(rhs => KeepLow(rhs))
-    case 'fn.keepabove': return bindDiceFn(rhs => KeepAbove(rhs))
-    case 'fn.keepbelow': return bindDiceFn(rhs => KeepBelow(rhs))
-
-    /// SECTION: Reroll functions
-    case 'fn.rerollhigh': return bindDiceFn(rhs => RerollHigh(rhs))
-    case 'fn.rerolllow': return bindDiceFn(rhs => RerollLow(rhs))
-    case 'fn.rerollabove': return bindDiceFn(rhs => RerollAbove(rhs))
-    case 'fn.rerollaboverec': return bindDiceFn(rhs => RerollAboveRecursive(rhs))
-    case 'fn.rerollbelow': return bindDiceFn(rhs => RerollBelow(rhs))
-    case 'fn.rerollbelowrec': return bindDiceFn(rhs => RerollBelowRecursive(rhs))
-      
-    /// SECTION: Class-specific
-    case 'fn.wildmagic': return bindDiceFn(WildMagic)
-
-    /// SECTION: Late-binding functions
-    case 'fn.difficultyclass': return bindSpecialFn(rhs => DifficultyClass(rhs))
-    
-    default:
-      throw `Expression type ${ast.type[1]} is not implemented`
-  }
-
-  throw `Unexpected token ${ast.text} at conversion time`
+const matchParen: {[k:string]:string} = {
+  '(': ')',
+  '[': ']',
+  '{': '}'
 }

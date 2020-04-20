@@ -1,12 +1,12 @@
 {
   "name": "dparse",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A dice notation parser and evaluator.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "node lib/test/runtests.js",
-    "prepare": "tsc --build && npm test"
+    "test": "tsc --build && npm explore gruetest -- npm test -- ./lib/test",
+    "prepack": "rmdir /s /q lib && tsc --build && npm test"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "homepage": "https://github.com/RoleSave/dparse#readme",
   "devDependencies": {
     "@types/node": "^13.13.0",
+    "gruetest": "^1.0.1",
     "typescript": "^3.8.3"
   }
 }

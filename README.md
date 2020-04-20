@@ -18,10 +18,12 @@ Or build it from source with the following steps:
 ## API
 The core of `dparse`'s functionality comes from two functions: `parseExpr` and `parseExprList`. The former parses a given expression and returns an `Expr`, and the latter parses a given comma-separated list of expressions and returns an `Expr[]`. Once you have an `Expr`, you can call `Expr#eval()` on it to retrieve a `Result`, which contains the evaluated result of the expression. 
 
-**Subsequent calls to `Expr#eval()` are not guaranteed to return equivalent `Result` instances.** Since dice are inherently random, any expression involving dice may return a different `Result#value`. If the expression contains dice notation, the dice will be rolled in the process of evaluation, and the resulting `DiceResults` will be included in the `Result#rolls` array. 
+**Subsequent calls to `Expr#eval()` are not guaranteed to return equivalent `Result` instances.** Since dice are inherently random, any expression involving dice may return a different `Result#value`.
+
+You can also add your own custom dice types, dice functions, and operators with the `registerOp` function.
 
 ## Supported Syntax
-`dparse` supports most basic mathematical and dice notation. It is built around a full expression parser with extensions for dice notation, and as such can handle essentially any combination of the below by simply performing mathematical operations on the results of rolls, as opposed to the strict `NdS+M` format that many dice calculators use. All syntax is case- and whitespace-insensitive.
+`dparse` supports most basic mathematical and dice notation out of the box. It is built around a full expression parser with extensions for dice notation, and as such can handle essentially any combination of the below by simply performing mathematical operations on the results of rolls, as opposed to the strict `NdS+M` format that many dice calculators use. All syntax is case- and whitespace-insensitive except for variable names.
 
 | Math function | Syntax | Description | Example
 | :--- | :---: | :--- | :---
@@ -33,6 +35,7 @@ The core of `dparse`'s functionality comes from two functions: `parseExpr` and `
 | Exponentiation | `^` | Raises a number to the power of another. | `3 ^ 2`
 | Grouping | `()` | Overrides the standard order of operations. | `3 * (2 + 2)`
 | Equation lists | `,` | Multiple expressions in one parse. Only works with `parseExprList`, not `parseExpr`. | `2+2, 3^2`
+| Variables | `$name` | Include a variable from context. Requires an `ExprCtx` to be passed to `Expr#eval`. | `1d20 + $dex`
 
 | Dice notation | Syntax | Description | Example
 | :--- | :---: | :--- | :---

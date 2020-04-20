@@ -1,4 +1,4 @@
 
-export { Dice, DiceResult, DiceFn } from './core/dice'
-export { Expr, Result } from './core/expr'
+export { Expr, Result, ExprCtx } from './core/expressions'
+export { Operators, Op, OpDef } from './core/operators'
 export { parseExpr, parseExprList } from './core/parse'
