@@ -3,6 +3,7 @@ import { wildMagicEffects } from "../opdefs/dnd5e";
 import { parseExpr, parseExprList } from "../core/parse";
 import { DiceResult } from "../core/expressions";
 import { Op } from '../core/operators'
+import { removeHighest, removeLowest } from "../util/functions";
 
 describe('Dice functions', (it,todo) => {
   it('should properly calculate exploding dice', assert => {
@@ -95,7 +96,23 @@ describe('Dice functions', (it,todo) => {
     })
   })
 
-  todo('should properly reroll the highest/lowest N rolls')
+  it('should properly reroll the highest/lowest N rolls', assert => {
+    let [rh, rl] = parseExprList('10d6rh5, 10d6rl5')
+
+    let rhRes = testConsistency(() => rh.eval() as DiceResult, roll => {
+      assert.equal(roll.rolls.length, (roll.prev![0] as DiceResult).rolls.length, 'rh rolls length')
+
+      let kept = removeHighest((roll.prev![0] as DiceResult).rolls, 5)
+      kept.forEach((r,i) => assert.equal(r, roll.rolls[i]))
+    })
+    
+    let rlRes = testConsistency(() => rl.eval() as DiceResult, roll => {
+      assert.equal(roll.rolls.length, (roll.prev![0] as DiceResult).rolls.length, 'rl rolls length')
+      
+      let kept = removeLowest((roll.prev![0] as DiceResult).rolls, 5)
+      kept.forEach((r,i) => assert.equal(r, roll.rolls[i]))
+    })
+  })
 
   it('should properly reroll above/below threshold', assert => {
     let [rgt, rlt] = parseExprList('10d4r>3, 10d4r<2')
