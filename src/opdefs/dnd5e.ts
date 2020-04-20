@@ -1,6 +1,57 @@
-import { registerOp, DiceResult, Result } from "../core/expressions";
-import { parseExpr } from "../core/parse";
-import { randInt } from "../util/functions";
+import { registerOp, Result, DiceResult } from "../core/expressions"
+import { randOf } from "../util/functions"
+import { parseExpr } from "../core/parse"
+
+registerOp({
+  name: 'advantage',
+  type: 'postop',
+  text: 'adv',
+  prec: 3,
+  eval: (op, orgRoll, ctx) => {
+    let advRoll = orgRoll.source.eval(ctx),
+        ordRoll = [orgRoll, advRoll].sort((a,b) => b.value - a.value)
+    return {
+      ...ordRoll[0],
+      source: op,
+      prev: [ ordRoll[1], ...orgRoll.prev ]
+    }
+  }
+})
+
+registerOp({
+  name: 'disadvantage',
+  type: 'postop',
+  text: 'dis',
+  prec: 3,
+  eval: (op, orgRoll, ctx) => {
+    let advRoll = orgRoll.source.eval(ctx),
+        ordRoll = [orgRoll, advRoll].sort((a,b) => a.value - b.value)
+    return {
+      ...ordRoll[0],
+      source: op,
+      prev: [ ordRoll[1], ...orgRoll.prev ]
+    }
+  }
+})
+
+registerOp({
+  name: 'difficulty_class',
+  type: 'binop',
+  text: 'dc',
+  prec: -1,
+  display: ' dc',
+  eval: (op, l, r) => ({
+    ...l,
+    source: op,
+    prev: [ l, r ],
+    statuses: [
+      ...l.statuses||[],
+      ...r.statuses||[],
+      { fromOp: op.def.name,
+        text: l.value >= r.value ? 'Pass' : 'Fail' }
+    ]
+  })
+})
 
 registerOp({
   name: 'wild_magic',
@@ -14,7 +65,7 @@ registerOp({
     if(l.value > l.rolls.length * (typeof l.minRoll !== 'undefined' ? l.minRoll : 1))
       return l
 
-    let effect = wildMagicEffects[randInt(wildMagicEffects.length)],
+    let effect = randOf(wildMagicEffects),
         effectRolls: Result[] = []
     while(effect.indexOf('{') > -1) {
       let open = effect.indexOf('{'), close = effect.indexOf('}'),

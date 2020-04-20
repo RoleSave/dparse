@@ -153,9 +153,8 @@ export class BinOp extends Expr {
 
 /// SECTION: Delegated definitions
 
-import './operators'
-import './dicetypes'
-import '../fns/core'
-import '../fns/keep'
-import '../fns/reroll'
-import '../fns/wildmagic'
+import '../opdefs/math'
+import '../opdefs/dice'
+import '../opdefs/dnd5e'
+import '../opdefs/keep'
+import '../opdefs/reroll'

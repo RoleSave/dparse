@@ -1,5 +1,5 @@
 import { describe, testConsistency } from "../testcore";
-import { wildMagicEffects } from "../../fns/wildmagic";
+import { wildMagicEffects } from "../../opdefs/dnd5e";
 import { parseExpr, parseExprList } from "../../core/parse";
 import { DiceResult, Op } from "../../core/expressions";
 

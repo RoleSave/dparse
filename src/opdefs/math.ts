@@ -1,4 +1,4 @@
-import { registerOp, BinOpDef } from "./expressions";
+import { registerOp, BinOpDef } from "../core/expressions";
 
 registerOp({
   name: 'add',

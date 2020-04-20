@@ -1,4 +1,4 @@
-import { registerOp, Result, DiceResult, Const } from "./expressions"
+import { registerOp, Result, DiceResult, Const, ExprCtx, isOp, Op } from "../core/expressions"
 import { arrayOf, randInt, fn, randComp } from "../util/functions"
 
 const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
@@ -57,5 +57,35 @@ registerOp({
   eval: (op, l) => {
     const _100 = new Const(100).eval()
     return { ...simpleDie(l, _100), source: op }
+  }
+})
+
+registerOp({
+  name: 'explode',
+  type: 'postop',
+  text: '!',
+  prec: 3,
+  requireType: 'dice',
+  eval: function explodeDice(op: Op, l: Result, ctx: ExprCtx, depth: number = 0): DiceResult {
+    if(depth > 100) throw `Exploding dice exceeded 100 explosion steps; please try again`
+    let result = l as DiceResult
+  
+    let explCount = result.rolls.reduce((n,x) => n+(x===result.maxRoll?1:0),0)
+    if(explCount > 0) {
+      let explDie: Op|undefined
+      if(isOp(result.source)) explDie = result.source.clone(explCount)
+      if(!explDie) throw `Could not construct new instance of ${result.source} for explosion`
+  
+      let explResult = explodeDice(op, explDie.eval(ctx) as DiceResult, ctx, depth+1),
+          allRolls = [ ...result.rolls, ...explResult.rolls ]
+      return {
+        ...result,
+        rolls: allRolls,
+        value: allRolls.reduce(fn.sum, 0),
+        prev: [ explResult, ...result.prev ]
+      }
+    }
+  
+    return result
   }
 })
