@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "node lib/test/runtests.js",
-    "prepare": "tsc --build && npm test"
+    "prepack": "rmdir /s /q lib && tsc --build && npm test"
   },
   "repository": {
     "type": "git",
