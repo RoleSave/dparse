@@ -1,7 +1,8 @@
 import { describe, testConsistency } from "../testcore";
 import { wildMagicEffects } from "../../opdefs/dnd5e";
 import { parseExpr, parseExprList } from "../../core/parse";
-import { DiceResult, Op } from "../../core/expressions";
+import { DiceResult } from "../../core/expressions";
+import { Op } from '../../core/operators'
 
 describe('Dice functions', (it,todo) => {
   it('should properly calculate exploding dice', assert => {

@@ -1,4 +1,5 @@
-import { registerOp, Result, DiceResult, Const, ExprCtx, isOp, Op } from "../core/expressions"
+import { Result, DiceResult, Const, ExprCtx } from "../core/expressions"
+import { Operators as Ops, Op } from "../core/operators"
 import { arrayOf, randInt, fn, randComp } from "../util/functions"
 
 const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
@@ -17,7 +18,7 @@ const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
   }
 }
 
-registerOp({
+Ops.registerOp({
   name: 'dice_basic',
   type: 'binop',
   text: 'd',
@@ -25,7 +26,7 @@ registerOp({
   eval: (op, l, r) => ({ ...simpleDie(l,r), source: op })
 })
 
-registerOp({
+Ops.registerOp({
   name: 'dice_fate',
   type: 'postop',
   text: 'dF',
@@ -48,7 +49,7 @@ registerOp({
   }
 })
 
-registerOp({
+Ops.registerOp({
   name: 'dice_percentile',
   type: 'postop',
   text: 'd%',
@@ -60,7 +61,7 @@ registerOp({
   }
 })
 
-registerOp({
+Ops.registerOp({
   name: 'explode',
   type: 'postop',
   text: '!',
@@ -73,7 +74,7 @@ registerOp({
     let explCount = result.rolls.reduce((n,x) => n+(x===result.maxRoll?1:0),0)
     if(explCount > 0) {
       let explDie: Op|undefined
-      if(isOp(result.source)) explDie = result.source.clone(explCount)
+      if(Ops.isOp(result.source)) explDie = result.source.clone(explCount)
       if(!explDie) throw `Could not construct new instance of ${result.source} for explosion`
   
       let explResult = explodeDice(op, explDie.eval(ctx) as DiceResult, ctx, depth+1),

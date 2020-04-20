@@ -1,4 +1,5 @@
-import { Expr, getOpList, OpDef, getOpsForPrec, highestOpPrec, lowestOpPrec, Group, Const, Variable, PostOp, PostOpDef, BinOpDef, BinOp } from "./expressions";
+import { Expr, Group, Const, Variable } from "./expressions";
+import { Operators as Ops, PostOp, PostOpDef, BinOpDef, BinOp, OpDef } from './operators'
 
 /// SECTION: Definitions
 
@@ -50,7 +51,7 @@ function lex(expr: string): Token[] {
       continue lex
     }
 
-    for(let op of getOpList().sort((a,b) => b.text.length - a.text.length)) {
+    for(let op of Ops.getOpList().sort((a,b) => b.text.length - a.text.length)) {
       if((c+from).startsWith(op.text.toLowerCase())) {
         from = from.slice(op.text.length-1)
         tokens.push({ type: 'op', text: op.text, opdef: op })
@@ -100,33 +101,6 @@ function collapse(tokens: Token[]): Token {
     ci = open+1
   }
 
-  // Consume a binary operator
-  function collapseBinop() {
-    if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
-    if(!next()) throw `Expected right-hand argument to operator ${curr().text}`
-    tokens = [
-      ...tokens.slice(0, ci-1), 
-      { type: 'op', 
-        text: prev().text+t.text+next().text, 
-        bound: [prev(), next()], 
-        opdef: t.opdef }, 
-      ...tokens.slice(ci+2)
-    ]
-  }
-  
-  // Consume a postfix operator
-  function collapsePostop() {
-    if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
-    tokens = [
-      ...tokens.slice(0, ci-1), 
-      { type: 'op', 
-        text: prev().text+t.text, 
-        bound: [prev()], 
-        opdef: t.opdef }, 
-      ...tokens.slice(ci+1)
-    ]
-  }
-
   // Parentheses
   while(t = curr()) {
     if(t.type == 'open') consumeParens()
@@ -136,16 +110,38 @@ function collapse(tokens: Token[]): Token {
 
   // Operators
 
-  for(let prec = highestOpPrec; prec >= lowestOpPrec; prec--) {
+  for(let prec = Ops.highestOpPrec; prec >= Ops.lowestOpPrec; prec--) {
     while(t = curr()) {
       if(t.type !== 'op') { advance(); continue }
 
       let found = false
-      for(let op of getOpsForPrec(prec)) if(t.opdef?.name == op.name) {
+      for(let op of Ops.getOpsForPrec(prec)) if(t.opdef?.name == op.name) {
         found = true
         switch(op.type) {
-          case 'postop': collapsePostop(); break
-          case 'binop': collapseBinop(); break
+          case 'postop': 
+            if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
+            tokens = [
+              ...tokens.slice(0, ci-1), 
+              { type: 'op', 
+                text: prev().text+t.text, 
+                bound: [prev()], 
+                opdef: t.opdef }, 
+              ...tokens.slice(ci+1)
+            ]
+            break
+
+          case 'binop': 
+            if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
+            if(!next()) throw `Expected right-hand argument to operator ${curr().text}`
+            tokens = [
+              ...tokens.slice(0, ci-1), 
+              { type: 'op', 
+                text: prev().text+t.text+next().text, 
+                bound: [prev(), next()], 
+                opdef: t.opdef }, 
+              ...tokens.slice(ci+2)
+            ]
+            break
         }
       }
 
