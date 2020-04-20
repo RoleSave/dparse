@@ -1,7 +1,7 @@
 import { registerOp, Result, DiceResult, Const } from "./expressions"
 import { arrayOf, randInt, fn, randComp } from "../util/functions"
 
-const basicEval = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
+const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
   if(l.value > 1000000) throw `Cannot roll more than 1,000,000 dice at once`
   if(l.value < 1) throw `Cannot roll less than 1 die`
   if(r.value < 2) throw `Cannot roll a die with less than 2 sides`
@@ -22,7 +22,7 @@ registerOp({
   type: 'binop',
   text: 'd',
   prec: 4,
-  eval: (op, l, r) => ({ ...basicEval(l,r), source: op })
+  eval: (op, l, r) => ({ ...simpleDie(l,r), source: op })
 })
 
 registerOp({
@@ -54,8 +54,8 @@ registerOp({
   text: 'd%',
   prec: 4,
   display: 'd100',
-  eval: (op, l, ctx) => {
-    const _100 = new Const(100).eval(ctx)
-    return { ...basicEval(l, _100), source: op }
+  eval: (op, l) => {
+    const _100 = new Const(100).eval()
+    return { ...simpleDie(l, _100), source: op }
   }
 })
