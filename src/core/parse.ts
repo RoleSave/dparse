@@ -10,12 +10,14 @@ type Token = {
   bound?: Token[]
 }
 
-export function parseExprList(exprs: string): Expr[] {
-  return exprs.split(',').filter(x=>x.trim()).map(parseExpr)
-}
-
+/** Parse a single expression. */
 export function parseExpr(expr: string): Expr {
   return convert(collapse(lex(expr)))
+}
+
+/** Parse a comma-separated list of expressions. */
+export function parseExprList(exprs: string): Expr[] {
+  return exprs.split(',').filter(x=>x.trim()).map(parseExpr)
 }
 
 /// SECTION: Lex
