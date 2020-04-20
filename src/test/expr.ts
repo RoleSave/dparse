@@ -1,6 +1,5 @@
-import { Const } from "../../core/expressions"
-import { parseExpr, parseExprList } from "../../core/parse"
-import { describe, testConsistency } from "../testcore"
+import describe, { testConsistency } from "gruetest"
+import { parseExpr, parseExprList } from "../core/parse"
 
 describe('Expression system', it => {
   it('should properly parse/eval basic expressions', assert => {

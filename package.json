@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "node lib/test/runtests.js",
+    "test": "npm explore gruetest -- npm test -- lib/test",
     "prepack": "rmdir /s /q lib && tsc --build && npm test"
   },
   "repository": {
@@ -26,6 +26,7 @@
   "homepage": "https://github.com/RoleSave/dparse#readme",
   "devDependencies": {
     "@types/node": "^13.13.0",
+    "gruetest": "^1.0.1",
     "typescript": "^3.8.3"
   }
 }
