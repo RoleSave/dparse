@@ -1,71 +1,50 @@
-import { Expr, Const } from "../core/expr"
-import { DiceResult, DiceFn } from "../core/dice"
+import { registerOp, DiceResult, BinOp, Result } from "../core/expressions"
 import { removeLowest, removeHighest, fn } from "../util/functions"
 
-export function KeepHigh(num: Expr|number) { 
-  return new (class KeepHigh extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let keepNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = removeLowest(result.rolls, result.rolls.length-keepNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-      return {
-        ...result,
-        rolls: keepRolls,
-        total: keepRolls.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...keepNum.rolls],
-        modBy: this
-      }
-    }
-  })('kh'+num)
+const keep = (keep: (rs: number[], v: number) => number[]) => (op: BinOp, _l: Result, r: Result) => {
+  let l = _l as DiceResult,
+      keepRolls = keep(l.rolls, r.value)
+  return {
+    ...l,
+    source: op,
+    rolls: keepRolls,
+    value: keepRolls.reduce(fn.sum, 0),
+    prev: [ l, r ]
+  }
 }
 
-export function KeepLow(num: Expr|number) { 
-  return new (class KeepLow extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let keepNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = removeHighest(result.rolls, result.rolls.length-keepNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-      return {
-        ...result,
-        rolls: keepRolls,
-        total: keepRolls.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...keepNum.rolls],
-        modBy: this
-      }
-    }
-  })('kl'+num)
-}
+registerOp({
+  name: 'keep_high',
+  type: 'binop',
+  text: 'kh',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: keep((rs,v) => removeLowest(rs, rs.length-v))
+})
 
-export function KeepAbove(num: Expr|number) { 
-  return new (class KeepAbove extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let keepNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = result.rolls.filter(n => n >= keepNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-      return {
-        ...result,
-        rolls: keepRolls,
-        total: keepRolls.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...keepNum.rolls],
-        modBy: this
-      }
-    }
-  })('k>'+num)
-}
+registerOp({
+  name: 'keep_low',
+  type: 'binop',
+  text: 'kl',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: keep((rs,v) => removeHighest(rs, rs.length-v))
+})
 
-export function KeepBelow(num: Expr|number) { 
-  return new (class KeepBelow extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let keepNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = result.rolls.filter(n => n <= keepNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-      return {
-        ...result,
-        rolls: keepRolls,
-        total: keepRolls.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...keepNum.rolls],
-        modBy: this
-      }
-    }
-  })('k<'+num)
-}
+registerOp({
+  name: 'keep_above',
+  type: 'binop',
+  text: 'k>',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: keep((rs,v) => rs.filter(n => n >= v))
+})
+
+registerOp({
+  name: 'keep_below',
+  type: 'binop',
+  text: 'k<',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: keep((rs,v) => rs.filter(n => n <= v))
+})

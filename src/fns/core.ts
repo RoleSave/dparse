@@ -1,74 +1,83 @@
-import { DiceResult, DiceFn } from "../core/dice"
-import { Expr, Const } from "../core/expr"
+import { registerOp, PostOp, Result, ExprCtx, DiceResult, Op, isOp } from "../core/expressions"
 import { fn } from "../util/functions"
 
-export const Explode = new (class Explode extends DiceFn {
-  apply(result: DiceResult, depth: number = 0): DiceResult {
+registerOp({
+  name: 'explode',
+  type: 'postop',
+  text: '!',
+  prec: 3,
+  requireType: 'dice',
+  eval: function explodeDice(op: PostOp, l: Result, ctx: ExprCtx, depth: number = 0): DiceResult {
     if(depth > 100) throw `Exploding dice exceeded 100 explosion steps; please try again`
-    let explCount = result.rolls.reduce((n,x) => n+(x===result.rollSides?1:0),0)
-
+    let result = l as DiceResult
+  
+    let explCount = result.rolls.reduce((n,x) => n+(x===result.maxRoll?1:0),0)
     if(explCount > 0) {
-      let explDie = result.source.clone(explCount, result.rollSides).addFn(this),
-          explResult = this.apply(explDie.roll(), depth+1),
+      let explDie: Op|undefined
+      if(isOp(result.source)) explDie = result.source.clone(explCount)
+      if(!explDie) throw `Could not construct new instance of ${result.source} for explosion`
+  
+      let explResult = explodeDice(op, explDie.eval(ctx) as DiceResult, ctx, depth+1),
           allRolls = [ ...result.rolls, ...explResult.rolls ]
       return {
         ...result,
         rolls: allRolls,
-        total: allRolls.reduce(fn.sum, 0),
-        prevResults: [explResult, ...result.prevResults||[]],
-        modBy: this,
-        tag: depth ? `explosion depth ${depth}` : undefined
+        value: allRolls.reduce(fn.sum, 0),
+        prev: [ explResult, ...result.prev ]
       }
     }
+  
+    return result
+  }
+})
 
+registerOp({
+  name: 'advantage',
+  type: 'postop',
+  text: 'adv',
+  prec: 3,
+  eval: (op, orgRoll, ctx) => {
+    let advRoll = orgRoll.source.eval(ctx),
+        ordRoll = [orgRoll, advRoll].sort((a,b) => b.value - a.value)
     return {
-      ...result,
-      tag: depth ? `explosion depth ${depth}` : undefined
+      ...ordRoll[0],
+      source: op,
+      prev: [ ordRoll[1], ...orgRoll.prev ]
     }
   }
-})('!')
+})
 
-export const Advantage = new (class Advantage extends DiceFn {
-  apply(result: DiceResult): DiceResult {
-    let advRoll = result.source.clone().roll(),
-        stripRes = {...result, source: result.source.clone()},
-        rolls = [stripRes, advRoll].sort((a,b) => b.total - a.total)
+registerOp({
+  name: 'disadvantage',
+  type: 'postop',
+  text: 'dis',
+  prec: 3,
+  eval: (op, orgRoll, ctx) => {
+    let advRoll = orgRoll.source.eval(ctx),
+        ordRoll = [orgRoll, advRoll].sort((a,b) => a.value - b.value)
     return {
-      ...rolls[0],
-      prevResults: [rolls[1], ...result.prevResults||[]],
-      modBy: this
+      ...ordRoll[0],
+      source: op,
+      prev: [ ordRoll[1], ...orgRoll.prev ]
     }
   }
-})('adv')
+})
 
-export const Disadvantage = new (class Disadvantage extends DiceFn {
-  apply(result: DiceResult): DiceResult {
-    let advRoll = result.source.clone().roll(),
-        stripRes = {...result, source: result.source.clone()},
-        rolls = [stripRes, advRoll].sort((a,b) => a.total - b.total)
-    return {
-      ...rolls[0],
-      prevResults: [rolls[1], ...result.prevResults||[]],
-      modBy: this
-    }
-  }
-})('dis')
-
-export function DifficultyClass(dc: Expr|number) {
-  return new (class DifficultyClass extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let dcRes = (dc instanceof Expr ? dc : dc = new Const(dc)).eval()
-      return {
-        ...result,
-        prevResults: [...dcRes.rolls, ...result.prevResults||[]],
-        modBy: this,
-
-        statuses: [
-          ...result.statuses||[],
-          { text: `DC ${dcRes.value}: ${result.total >= dcRes.value ? 'Pass' : 'Fail'}`, 
-            type: 'dc' }
-        ]
-      }
-    }
-  })('dc'+dc)
-}
+registerOp({
+  name: 'difficulty_class',
+  type: 'binop',
+  text: 'dc',
+  prec: -1,
+  display: ' dc',
+  eval: (op, l, r) => ({
+    ...l,
+    source: op,
+    prev: [ l, r ],
+    statuses: [
+      ...l.statuses||[],
+      ...r.statuses||[],
+      { fromOp: op.def.name,
+        text: l.value >= r.value ? 'Pass' : 'Fail' }
+    ]
+  })
+})

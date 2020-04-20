@@ -1,34 +1,40 @@
-import { DiceFn, DiceResult } from "../core/dice";
-import { randInt } from "../util/functions";
+import { registerOp, DiceResult, Result } from "../core/expressions";
 import { parseExpr } from "../core/parse";
+import { randInt } from "../util/functions";
 
-export const WildMagic = new (class WildMagic extends DiceFn {
-  apply(result: DiceResult): DiceResult {
-    if(result.total !== result.source.minimumRoll*result.rolls.length)
-      return result
+registerOp({
+  name: 'wild_magic',
+  type: 'postop',
+  text: 'wm',
+  prec: 3,
+  display: ' wm',
+  requireType: 'dice',
+  eval: (op, _l) => {
+    let l = _l as DiceResult
+    if(l.value > l.rolls.length * (typeof l.minRoll !== 'undefined' ? l.minRoll : 1))
+      return l
 
     let effect = wildMagicEffects[randInt(wildMagicEffects.length)],
-        effectRolls: DiceResult[] = []
+        effectRolls: Result[] = []
     while(effect.indexOf('{') > -1) {
       let open = effect.indexOf('{'), close = effect.indexOf('}'),
           dieNot = effect.slice(open+1, close),
           dieRes = parseExpr(dieNot).eval()
       effect = effect.slice(0,open)+dieNot+effect.slice(close+1)
-      effectRolls.push(...dieRes.rolls)
+      effectRolls.push(dieRes)
     }
 
     return {
-      ...result,
-      modBy: this,
+      ...l,
       statuses: [
-        ...result.statuses||[],
-        { text: `Wild Magic Effect: ${effect}`,
-          type: 'wm',
-          rolls: effectRolls.map(r => ({...r, tag: 'wild magic'})) }
+        ...l.statuses||[],
+        { fromOp: op.def.name,
+          text: effect,
+          results: effectRolls }
       ]
     }
   }
-})('wm')
+})
 
 export const wildMagicEffects = [
   "Roll on this table at the start of each of your turns for the next minute, ignoring this result on subsequent rolls.",

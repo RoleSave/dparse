@@ -1,153 +1,93 @@
-import { Expr, Const } from "../core/expr"
-import { DiceResult, DiceFn } from "../core/dice"
+import { registerOp, DiceResult, BinOp, Result, ExprCtx, Op, isOp } from "../core/expressions"
 import { removeHighest, removeLowest, fn } from "../util/functions"
 
-export function RerollHigh(num: Expr|number) { 
-  return new (class RerollHigh extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let rollNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = removeHighest(result.rolls, rollNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-          
-      if(keepRolls.length === result.rolls.length) return {
-        ...result,
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
+const reroll = (keep: (rolls:number[], vs:number) => number[]) => (op: BinOp, _l: Result, r: Result, ctx: ExprCtx): DiceResult => {
+  let l = _l as DiceResult,
+      keepRolls = keep(l.rolls, r.value)
+  if(keepRolls.length === l.rolls.length) 
+    return { ...l, source: op, prev: [ l, r ] }
 
-      let rerolled = [
-        ...keepRolls,
-        ...result.source.clone(rollNum.value).roll().rolls
-      ]
+  let rerollDie: Op|undefined
+  if(isOp(l.source)) {
+    if(/^reroll_.+_rec/.test(l.source.def.name)) l = l.prev[0] as DiceResult
+    rerollDie = (l.source as Op).clone(l.rolls.length - keepRolls.length)
+  }
+  if(!rerollDie)
+    throw `Could not construct new instance of ${l.source} for rerolling`
 
-      return {
-        ...result,
-        rolls: rerolled,
-        total: rerolled.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
-    }
-  })('rh'+num)
+  let rerollResult = rerollDie.eval(ctx) as DiceResult,
+      outRolls = [ ...keepRolls, ...rerollResult.rolls ]
+  return {
+    ...rerollResult,
+    source: op,
+    rolls: outRolls,
+    value: outRolls.reduce(fn.sum, 0),
+    prev: [ l, r ]
+  }
 }
 
-export function RerollLow(num: Expr|number) { 
-  return new (class RerollLow extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let rollNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = removeLowest(result.rolls, rollNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-          
-      if(keepRolls.length === result.rolls.length) return {
-        ...result,
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
+registerOp({
+  name: 'reroll_high',
+  type: 'binop',
+  text: 'rh',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: reroll(removeHighest)
+})
 
-      let rerolled = [
-        ...keepRolls,
-        ...result.source.clone(rollNum.value).roll().rolls
-      ]
+registerOp({
+  name: 'reroll_low',
+  type: 'binop',
+  text: 'rl',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: reroll(removeLowest)
+})
 
-      return {
-        ...result,
-        rolls: rerolled,
-        total: rerolled.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
-    }
-  })('rl'+num)
-}
+registerOp({
+  name: 'reroll_above',
+  type: 'binop',
+  text: 'r>',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: reroll((rs,v) => rs.filter(n => n < v))
+})
 
-export function RerollAbove(num: Expr|number) { 
-  return new (class RerollAbove extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let rollNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = result.rolls.filter(n => n < rollNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-          
-      if(keepRolls.length === result.rolls.length) return {
-        ...result,
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
+registerOp({
+  name: 'reroll_below',
+  type: 'binop',
+  text: 'r<',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: reroll((rs,v) => rs.filter(n => n > v))
+})
 
-      let rerolled = [
-        ...keepRolls,
-        ...result.source.clone(result.rolls.length - keepRolls.length).roll().rolls
-      ]
+registerOp({
+  name: 'reroll_above_rec',
+  type: 'binop',
+  text: 'r!>',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: (op, l, r, ctx) => {
+    let method = reroll((rs,v) => rs.filter(n => n < v)),
+        result = method(op, l, r, ctx)
+    while(result.rolls.find(n => n >= r.value))
+      result = method(op, result, r, ctx)
+    return result
+  }
+})
 
-      return {
-        ...result,
-        rolls: rerolled,
-        total: rerolled.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
-    }
-  })('r>'+num)
-}
-
-export function RerollAboveRecursive(num: Expr|number) {
-  let base = RerollAbove(num)
-  return new (class RerollAboveRecursive extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let rollNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          newRes = base.apply(result)
-      while(newRes.rolls.find(r => r >= rollNum.value))
-        newRes = base.apply(newRes)
-
-      return {
-        ...newRes,
-        modBy: this
-      }
-    }
-  })('r!>'+num)
-}
-
-export function RerollBelow(num: Expr|number) { 
-  return new (class RerollBelow extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let rollNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          keepRolls = result.rolls.filter(n => n > rollNum.value),
-          stripRes = { ...result, source: result.source.clone() }
-
-      if(keepRolls.length === result.rolls.length) return {
-        ...result,
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
-
-      let rerolled = [
-        ...keepRolls,
-        ...result.source.clone(result.rolls.length - keepRolls.length).roll().rolls
-      ]
-
-      return {
-        ...result,
-        rolls: rerolled,
-        total: rerolled.reduce(fn.sum, 0),
-        prevResults: [stripRes, ...rollNum.rolls],
-        modBy: this
-      }
-    }
-  })('r<'+num)
-}
-
-export function RerollBelowRecursive(num: Expr|number) {
-  let base = RerollBelow(num)
-  return new (class RerollBelowRecursive extends DiceFn {
-    apply(result: DiceResult): DiceResult {
-      let rollNum = (num instanceof Expr ? num : num = new Const(num)).eval(),
-          newRes = base.apply(result)
-      while(newRes.rolls.find(r => r <= rollNum.value))
-        newRes = base.apply(newRes)
-
-      return {
-        ...newRes,
-        modBy: this
-      }
-    }
-  })('r!<'+num)
-}
+registerOp({
+  name: 'reroll_below_rec',
+  type: 'binop',
+  text: 'r!<',
+  prec: 3,
+  requireTypeL: 'dice',
+  eval: (op, l, r, ctx) => {
+    let method = reroll((rs,v) => rs.filter(n => n > v)),
+        result = method(op, l, r, ctx)
+    while(result.rolls.find(n => n <= r.value))
+      result = method(op, result, r, ctx)
+    return result
+  }
+})

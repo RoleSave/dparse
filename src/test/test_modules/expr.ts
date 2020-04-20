@@ -1,3 +1,4 @@
+import { Const } from "../../core/expressions"
 import { parseExpr, parseExprList } from "../../core/parse"
 import { describe, testConsistency } from "../testcore"
 
@@ -16,14 +17,14 @@ describe('Expression system', it => {
     }
 
     assert.equal(exprs.const.toString(), '3', 'const parse')
-    assert.equal(exprs.add.toString(), '3 + 2', 'add parse')
-    assert.equal(exprs.sub.toString(), '3 - 2', 'sub parse')
-    assert.equal(exprs.mul.toString(), '3 * 2', 'mul parse *')
-    assert.equal(exprs.mulX.toString(), '3 * 2', 'mul parse x')
-    assert.equal(exprs.div.toString(), '3 / 2', 'div parse')
-    assert.equal(exprs.mod.toString(), '3 % 2', 'mod parse')
-    assert.equal(exprs.pow.toString(), '3 ^ 2', 'pow parse')
-    assert.equal(exprs.par.toString(), '3 * (2 + 2)', 'par parse')
+    assert.equal(exprs.add.toString(), '3+2', 'add parse')
+    assert.equal(exprs.sub.toString(), '3-2', 'sub parse')
+    assert.equal(exprs.mul.toString(), '3*2', 'mul parse *')
+    assert.equal(exprs.mulX.toString(), '3x2', 'mul parse x')
+    assert.equal(exprs.div.toString(), '3/2', 'div parse')
+    assert.equal(exprs.mod.toString(), '3%2', 'mod parse')
+    assert.equal(exprs.pow.toString(), '3^2', 'pow parse')
+    assert.equal(exprs.par.toString(), '3*(2+2)', 'par parse')
 
     assert.equal(exprs.const.eval().value, 3, 'const eval')
     assert.equal(exprs.add.eval().value, 5, 'add eval')
@@ -39,15 +40,29 @@ describe('Expression system', it => {
   it('should properly parse/eval expression lists', assert => {
     let [add, sub, mul, div] = parseExprList('3+2, 3-2, 3*2, 3/2')
 
-    assert.equal(add.toString(), '3 + 2', 'add parse')
-    assert.equal(sub.toString(), '3 - 2', 'sub parse')
-    assert.equal(mul.toString(), '3 * 2', 'mul parse')
-    assert.equal(div.toString(), '3 / 2', 'div parse')
+    assert.equal(add.toString(), '3+2', 'add parse')
+    assert.equal(sub.toString(), '3-2', 'sub parse')
+    assert.equal(mul.toString(), '3*2', 'mul parse')
+    assert.equal(div.toString(), '3/2', 'div parse')
 
     assert.equal(add.eval().value, 5, 'add eval')
     assert.equal(sub.eval().value, 1, 'sub eval')
     assert.equal(mul.eval().value, 6, 'mul eval')
     assert.equal(div.eval().value, 1, 'div eval')
+  })
+
+  it('should properly parse/eval variables', assert => {
+    let [simple, modify, asdie1, asdie2] = parseExprList('$test, $test+3, $test;d6, $test d6')
+
+    assert.equal(simple.toString(), '$test;',   'simple parse')
+    assert.equal(modify.toString(), '$test;+3', 'modify parse')
+    assert.equal(asdie1.toString(), '$test;d6', 'asdie1 parse')
+    assert.equal(asdie2.toString(), '$test;d6', 'asdie2 parse')
+    
+    assert.equal(simple.eval({ test: new Const(4) }).value, 4, 'simple eval')
+    assert.equal(modify.eval({ test: new Const(4) }).value, 7, 'modify eval')
+    assert.inRange(asdie1.eval({ test: new Const(4) }).value, 4, 24, 'asdie1 eval')
+    assert.inRange(asdie2.eval({ test: new Const(4) }).value, 4, 24, 'asdie2 eval')
   })
 
   it('should properly parse/eval dice notation', assert => {
@@ -58,7 +73,7 @@ describe('Expression system', it => {
       exp: parseExpr('4d6!'),
       adv: parseExpr('1d6adv'),
       dis: parseExpr('1d6dis'),
-      dc: parseExpr('4d6 dc 10'),
+      dc: parseExpr('4d6 dc10'),
       wm: parseExpr('4d6 wm'),
 
       kh: parseExpr('4d6kh3'),
@@ -79,8 +94,8 @@ describe('Expression system', it => {
     assert.equal(exprs.exp.toString(), '4d6!', 'exp parse')
     assert.equal(exprs.adv.toString(), '1d6adv', 'adv parse')
     assert.equal(exprs.dis.toString(), '1d6dis', 'dis parse')
-    assert.equal(exprs.dc.toString(), '4d6dc10', 'dc parse')
-    assert.equal(exprs.wm.toString(), '4d6wm', 'wm parse')
+    assert.equal(exprs.dc.toString(), '4d6 dc10', 'dc parse')
+    assert.equal(exprs.wm.toString(), '4d6 wm', 'wm parse')
 
     assert.equal(exprs.kh.toString(), '4d6kh3', 'kh parse')
     assert.equal(exprs.kl.toString(), '4d6kl3', 'kl parse')

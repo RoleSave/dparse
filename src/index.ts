@@ -1,4 +1,3 @@
 
-export { Dice, DiceResult, DiceFn } from './core/dice'
-export { Expr, Result } from './core/expr'
+export { Expr, Result, ExprCtx, registerOp } from './core/expressions'
 export { parseExpr, parseExprList } from './core/parse'
