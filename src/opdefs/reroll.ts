@@ -1,6 +1,6 @@
 import { DiceResult, Result, ExprCtx, } from "../core/expressions"
 import { Operators as Ops, Op, BinOp } from "../core/operators"
-import { removeHighest, removeLowest, fn } from "../util/functions"
+import { removeHighest, removeLowest, sum } from "../util/functions"
 
 const reroll = (keep: (rolls:number[], vs:number) => number[]) => (op: BinOp, _l: Result, r: Result, ctx: ExprCtx): DiceResult => {
   let l = _l as DiceResult,
@@ -22,7 +22,7 @@ const reroll = (keep: (rolls:number[], vs:number) => number[]) => (op: BinOp, _l
     ...rerollResult,
     source: op,
     rolls: outRolls,
-    value: outRolls.reduce(fn.sum, 0),
+    value: outRolls.reduce(sum, 0),
     prev: [ l, r ]
   }
 }

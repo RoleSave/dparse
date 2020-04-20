@@ -1,6 +1,6 @@
 import { Result, DiceResult, Const, ExprCtx } from "../core/expressions"
 import { Operators as Ops, Op } from "../core/operators"
-import { arrayOf, randInt, fn, randComp } from "../util/functions"
+import { arrayOf, randInt, sum, randComp } from "../util/functions"
 
 const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
   if(l.value > 1000000) throw `Cannot roll more than 1,000,000 dice at once`
@@ -11,7 +11,7 @@ const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
   return {
     type: 'dice',
     rolls: rolls,
-    value: rolls.reduce(fn.sum, 0),
+    value: rolls.reduce(sum, 0),
     prev: [ ...l.prev, ...r.prev ],
     rollCount: l.value,
     maxRoll: r.value
@@ -39,7 +39,7 @@ Ops.registerOp({
     return {
       type: 'dice',
       rolls: rolls,
-      value: rolls.reduce(fn.sum, 0),
+      value: rolls.reduce(sum, 0),
       source: op,
       prev: l.prev,
       rollCount: l.value,
@@ -82,7 +82,7 @@ Ops.registerOp({
       return {
         ...result,
         rolls: allRolls,
-        value: allRolls.reduce(fn.sum, 0),
+        value: allRolls.reduce(sum, 0),
         prev: [ explResult, ...result.prev ]
       }
     }

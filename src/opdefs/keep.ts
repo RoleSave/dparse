@@ -1,6 +1,6 @@
 import { DiceResult, Result } from "../core/expressions"
 import { Operators as Ops, BinOp } from "../core/operators"
-import { removeLowest, removeHighest, fn } from "../util/functions"
+import { removeLowest, removeHighest, sum } from "../util/functions"
 
 const keep = (keep: (rs: number[], v: number) => number[]) => (op: BinOp, _l: Result, r: Result) => {
   let l = _l as DiceResult,
@@ -9,7 +9,7 @@ const keep = (keep: (rs: number[], v: number) => number[]) => (op: BinOp, _l: Re
     ...l,
     source: op,
     rolls: keepRolls,
-    value: keepRolls.reduce(fn.sum, 0),
+    value: keepRolls.reduce(sum, 0),
     prev: [ l, r ]
   }
 }
