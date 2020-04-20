@@ -21,17 +21,24 @@ export type DiceResult = Result_base & {
 /// SECTION: Core expression types
 
 export type ExprCtx = {[k:string]: Expr}
+
 export abstract class Expr {
   constructor(readonly cacheable: boolean) {}
 
   private cached?: Result
-  eval(ctx: ExprCtx = {}): Result {
+  eval(ctx: {[k:string]: Expr|number} = {}): Result {
     if(this.cacheable && this.cached) return this.cached
-    return this.cached = this.performEval(ctx)
+    return this.cached = this.performEval(Expr.simplifyCtx(ctx))
   }
 
   protected abstract performEval(ctx: ExprCtx): Result
   abstract toString(): string
+
+  private static simplifyCtx(ctx: {[k:string]: Expr|number}): ExprCtx {
+    return Object.entries(ctx)
+      .map(([k,v]) => [k, v instanceof Expr ? v : new Const(v)] as [string, Expr])
+      .reduce((a,[k,v]) => ({ ...a, [k]: v }), {})
+  }
 }
 
 export class Const extends Expr {
@@ -62,7 +69,7 @@ export class Variable extends Expr {
   }
 }
 
-/// SECTION: Delegated definitions
+/// SECTION: Built-in operator definitions
 
 import '../opdefs/math'
 import '../opdefs/dice'

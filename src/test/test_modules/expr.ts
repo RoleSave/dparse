@@ -59,10 +59,10 @@ describe('Expression system', it => {
     assert.equal(asdie1.toString(), '$test;d6', 'asdie1 parse')
     assert.equal(asdie2.toString(), '$test;d6', 'asdie2 parse')
     
-    assert.equal(simple.eval({ test: new Const(4) }).value, 4, 'simple eval')
-    assert.equal(modify.eval({ test: new Const(4) }).value, 7, 'modify eval')
-    assert.inRange(asdie1.eval({ test: new Const(4) }).value, 4, 24, 'asdie1 eval')
-    assert.inRange(asdie2.eval({ test: new Const(4) }).value, 4, 24, 'asdie2 eval')
+    assert.equal(simple.eval({ test: 4 }).value, 4, 'simple eval')
+    assert.equal(modify.eval({ test: 4 }).value, 7, 'modify eval')
+    assert.inRange(asdie1.eval({ test: 4 }).value, 4, 24, 'asdie1 eval')
+    assert.inRange(asdie2.eval({ test: 4 }).value, 4, 24, 'asdie2 eval')
   })
 
   it('should properly parse/eval dice notation', assert => {
