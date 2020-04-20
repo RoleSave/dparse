@@ -11,8 +11,9 @@ npm install dparse
 Or build it from source with the following steps:
 
 1. Clone the Github repository.
-2. Run `npm pack` to generate a tarball.
-3. Run `npm install <tarball path>` in the project you wish to install in.
+1. Run `npm install` to download dependencies.
+3. Run `npm pack` to generate a tarball.
+4. Run `npm install <tarball path>` in the project you wish to install in.
 
 ## API
 The core of `dparse`'s functionality comes from two functions: `parseExpr` and `parseExprList`. The former parses a given expression and returns an `Expr`, and the latter parses a given comma-separated list of expressions and returns an `Expr[]`. Once you have an `Expr`, you can call `Expr#eval()` on it to retrieve a `Result`, which contains the evaluated result of the expression. 
