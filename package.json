@@ -26,7 +26,7 @@
   "homepage": "https://github.com/RoleSave/dparse#readme",
   "devDependencies": {
     "@types/node": "^13.13.0",
-    "gruetest": "^1.0.1",
+    "gruetest": "^1.0.2",
     "typescript": "^3.8.3"
   }
 }
