@@ -1,7 +1,7 @@
 import describe, { testConsistency } from "gruetest";
 import { wildMagicEffects } from "../opdefs/dnd5e";
 import { parseExpr, parseExprList } from "../core/parse";
-import { DiceResult } from "../core/expressions";
+import { DiceResult, isDiceResult } from "../core/expressions";
 import { Op } from '../core/operators'
 import { removeHighest, removeLowest } from "../util/functions";
 
@@ -10,6 +10,7 @@ describe('Dice functions', (it,todo) => {
     let exp = parseExpr('10d6!')
 
     let expRes = testConsistency(() => exp.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 1, 'explode prev length')
       let maxCount = roll.rolls.reduce((a,b) => a+(b==roll.maxRoll?1:0), 0)
       assert.equal(roll.rolls.length, roll.rollCount+maxCount, 'exp roll count')
     })
@@ -19,12 +20,12 @@ describe('Dice functions', (it,todo) => {
     let [adv, dis] = parseExprList('1d20adv, 1d20dis')
 
     let advRes = testConsistency(() => adv.eval() as DiceResult, roll => {
-      assert.equal(roll.prev?.length, 1, 'adv results length')
+      assert.equal(roll.prev.length, 2, 'adv prev length')
       assert.greaterOrEqual(roll.value, roll.prev?.[0].value, 'adv a>b')
     })
     
     let disRes = testConsistency(() => dis.eval() as DiceResult, roll => {
-      assert.equal(roll.prev?.length, 1, 'dis results length')
+      assert.equal(roll.prev.length, 2, 'dis prev length')
       assert.lessOrEqual(roll.value, roll.prev?.[0].value, 'dis a<b')
     })
   })
@@ -33,6 +34,7 @@ describe('Dice functions', (it,todo) => {
     let dc = parseExpr('1d20 dc10')
 
     let dcRes = testConsistency(() => dc.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'dc prev length')
       assert.equal(roll.statuses?.length, 1, 'dc statuses length')
       assert.equal(roll.statuses?.[0].fromOp, 'difficulty_class', 'dc status type')
       assert.equal(roll.statuses?.[0].text, roll.value >= 10 ? 'Pass' : 'Fail', 'dc status text')
@@ -44,6 +46,7 @@ describe('Dice functions', (it,todo) => {
 
     const wmEffects = wildMagicEffects.map(s => s.replace(/[\{\}]/g, ''))
     let wmRes = testConsistency(() => wm.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 1, 'wm prev length')
       let min = (roll.source as Op).def.name === 'dice_fate' ? -1 : 1
 
       if(roll.value === roll.rolls.length * (typeof roll.minRoll !== 'undefined' ? roll.minRoll : 1)) {
@@ -66,6 +69,7 @@ describe('Dice functions', (it,todo) => {
     let [kh, kl] = parseExprList('4d6kh3, 4d6kl3')
 
     let khRes = testConsistency(() => kh.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'kh prev length')
       assert.equal(roll.rolls.length, 3, 'kh roll count')
       assert.equal((roll.prev![0] as DiceResult).rolls.length, 4, 'kh prev count')
 
@@ -75,6 +79,7 @@ describe('Dice functions', (it,todo) => {
     })
 
     let klRes = testConsistency(() => kl.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'kl prev length')
       assert.equal(roll.rolls.length, 3, 'kl roll count')
       assert.equal((roll.prev![0] as DiceResult).rolls.length, 4, 'kl prev count')
 
@@ -88,10 +93,12 @@ describe('Dice functions', (it,todo) => {
     let [kgt, klt] = parseExprList('4d6k>3, 4d6k<3')
 
     let kgtRes = testConsistency(() => kgt.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'kgt prev length')
       assert.greaterOrEqual(Math.min(...roll.rolls), 3, 'kgt >=3 kept')
     })
 
     let kltRes = testConsistency(() => klt.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'klt prev length')
       assert.lessOrEqual(Math.max(...roll.rolls), 3, 'klt <=3 kept')
     })
   })
@@ -100,6 +107,7 @@ describe('Dice functions', (it,todo) => {
     let [rh, rl] = parseExprList('10d6rh5, 10d6rl5')
 
     let rhRes = testConsistency(() => rh.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'rh prev length')
       assert.equal(roll.rolls.length, (roll.prev![0] as DiceResult).rolls.length, 'rh rolls length')
 
       let kept = removeHighest((roll.prev![0] as DiceResult).rolls, 5)
@@ -107,6 +115,7 @@ describe('Dice functions', (it,todo) => {
     })
     
     let rlRes = testConsistency(() => rl.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'rl prev length')
       assert.equal(roll.rolls.length, (roll.prev![0] as DiceResult).rolls.length, 'rl rolls length')
       
       let kept = removeLowest((roll.prev![0] as DiceResult).rolls, 5)
@@ -118,6 +127,7 @@ describe('Dice functions', (it,todo) => {
     let [rgt, rlt] = parseExprList('10d4r>3, 10d4r<2')
 
     let rgtRes = testConsistency(() => rgt.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'r> prev length')
       assert.equal(roll.rolls.length, (roll.prev![0] as DiceResult).rolls.length, 'rgt rolls length')
       
       let kept = (roll.prev![0] as DiceResult).rolls.filter(r => r <= 2)
@@ -125,6 +135,7 @@ describe('Dice functions', (it,todo) => {
     })
 
     let rltRes = testConsistency(() => rlt.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'r< prev length')
       assert.equal(roll.rolls.length, (roll.prev![0] as DiceResult).rolls.length, 'rlt rolls length')
       
       let kept = (roll.prev![0] as DiceResult).rolls.filter(r => r >= 3)
@@ -136,10 +147,12 @@ describe('Dice functions', (it,todo) => {
     let [rrgt, rrlt] = parseExprList('10d4r!>3, 10d4r!<2')
 
     let rrgtRes = testConsistency(() => rrgt.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'r!> prev length')
       assert.lessOrEqual(Math.max(...roll.rolls), 2, 'rrgt rolls max')
       
       let curr = roll, prev
-      while(prev = curr.prev?.[0] as DiceResult) {
+      while((prev = curr.prev[0]) && isDiceResult(prev) && prev.source.def.name === 'reroll_above_rec') {
+        assert.equal(curr.prev.length, 2, 'r!> rec prev length')
         assert.equal(curr.rolls.length, prev.rolls.length, 'rrgt rolls length')
 
         let kept = prev.rolls.filter(r => r <= 2)
@@ -150,10 +163,12 @@ describe('Dice functions', (it,todo) => {
     })
 
     let rrltRes = testConsistency(() => rrlt.eval() as DiceResult, roll => {
+      assert.equal(roll.prev.length, 2, 'r!< prev length')
       assert.greaterOrEqual(Math.min(...roll.rolls), 3, 'rrlt rolls min')
       
       let curr = roll, prev
-      while(prev = curr.prev?.[0] as DiceResult) {
+      while((prev = curr.prev[0]) && isDiceResult(prev) && prev.source.def.name === 'reroll_below_rec') {
+        assert.equal(roll.prev.length, 2, 'r!< rec prev length')
         assert.equal(curr.rolls.length, prev.rolls.length, 'rrlt rolls length')
 
         let kept = prev.rolls.filter(r => r >= 3)

@@ -12,7 +12,7 @@ const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
     type: 'dice',
     rolls: rolls,
     value: rolls.reduce(sum, 0),
-    prev: [ ...l.prev, ...r.prev ],
+    prev: [ l, r ],
     rollCount: l.value,
     maxRoll: r.value
   }
@@ -41,7 +41,7 @@ Ops.registerOp({
       rolls: rolls,
       value: rolls.reduce(sum, 0),
       source: op,
-      prev: l.prev,
+      prev: [ l ],
       rollCount: l.value,
       maxRoll: 1,
       minRoll: -1
@@ -83,10 +83,14 @@ Ops.registerOp({
         ...result,
         rolls: allRolls,
         value: allRolls.reduce(sum, 0),
-        prev: [ explResult, ...result.prev ]
+        prev: [ explResult ]
       }
     }
   
-    return result
+    return {
+      ...result,
+      source: op,
+      prev: [ result ]
+    }
   }
 })
