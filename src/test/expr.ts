@@ -1,5 +1,6 @@
 import describe, { testConsistency } from "gruetest"
 import { parseExpr, parseExprList } from "../core/parse"
+import { Expr } from "../core/expressions"
 
 describe('Expression system', it => {
   it('should properly parse/eval basic expressions', assert => {
@@ -57,6 +58,11 @@ describe('Expression system', it => {
     assert.equal(modify.toString(), '$test;+3', 'modify parse')
     assert.equal(asdie1.toString(), '$test;d6', 'asdie1 parse')
     assert.equal(asdie2.toString(), '$test;d6', 'asdie2 parse')
+
+    assert.equal(simple.toString(Expr.simplifyCtx({ test: 4 })), '(4)',   'simple parse ctx')
+    assert.equal(modify.toString(Expr.simplifyCtx({ test: 4 })), '(4)+3', 'modify parse ctx')
+    assert.equal(asdie1.toString(Expr.simplifyCtx({ test: 4 })), '(4)d6', 'asdie1 parse ctx')
+    assert.equal(asdie2.toString(Expr.simplifyCtx({ test: 4 })), '(4)d6', 'asdie2 parse ctx')
     
     assert.equal(simple.eval({ test: 4 }).value, 4, 'simple eval')
     assert.equal(modify.eval({ test: 4 }).value, 7, 'modify eval')

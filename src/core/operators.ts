@@ -98,7 +98,7 @@ export class PostOp extends Expr {
     readonly lhs: Expr
   ) { super(!!def.cacheable && lhs.cacheable) }
 
-  toString() { return `${this.lhs}${this.def.display || this.def.text}` }
+  toString(ctx?: ExprCtx) { return `${this.lhs.toString(ctx)}${this.def.display || this.def.text}` }
   protected performEval(ctx: ExprCtx): Result {
     let l = this.lhs.eval(ctx)
     if(this.def.requireType && this.def.requireType !== l.type)
@@ -125,7 +125,7 @@ export class BinOp extends Expr {
     readonly rhs: Expr
   ) { super(!!def.cacheable && lhs.cacheable && rhs.cacheable) }
 
-  toString() { return `${this.lhs}${this.def.display || this.def.text}${this.rhs}` }
+  toString(ctx?: ExprCtx) { return `${this.lhs.toString(ctx)}${this.def.display || this.def.text}${this.rhs.toString(ctx)}` }
   protected performEval(ctx: ExprCtx): Result {
     let l = this.lhs.eval(ctx),
         r = this.rhs.eval(ctx)

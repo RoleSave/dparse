@@ -65,10 +65,10 @@ export abstract class Expr {
 
   /** (internal) Perform the evaluation of this expression. */
   protected abstract performEval(ctx: ExprCtx): Result
-  abstract toString(): string
+  abstract toString(ctx?: ExprCtx): string
 
   /** Wrap numbers in `Const` for `ExprCtx`. */
-  private static simplifyCtx(ctx: {[k:string]: Expr|number}): ExprCtx {
+  static simplifyCtx(ctx: {[k:string]: Expr|number}): ExprCtx {
     return Object.entries(ctx)
       .map(([k,v]) => [k, v instanceof Expr ? v : new Const(v)] as [string, Expr])
       .reduce((a,[k,v]) => ({ ...a, [k]: v }), {})
@@ -89,7 +89,7 @@ export class Const extends Expr {
 export class Group extends Expr {
   constructor(/** The expression inside the parens. */ readonly contains: Expr) { super(contains.cacheable) }
 
-  toString() { return `(${this.contains})` }
+  toString(ctx?: ExprCtx) { return `(${this.contains.toString(ctx)})` }
   protected performEval(ctx: ExprCtx): Result {
     return this.contains.eval(ctx)
   }
@@ -99,7 +99,7 @@ export class Group extends Expr {
 export class Variable extends Expr {
   constructor(/** The name of the variable. */ readonly name: string) { super(false) }
 
-  toString() { return `\$${this.name};` }
+  toString(ctx?: ExprCtx) { return ctx?.[this.name] ? `(${ctx[this.name].toString(ctx)})` : `\$${this.name};` }
   protected performEval(ctx: ExprCtx): Result {
     let val = ctx[this.name]?.eval(ctx)
     return { type: 'basic', source: this, value: val?.value || NaN, prev: [val] }
