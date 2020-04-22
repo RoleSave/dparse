@@ -1,3 +1,4 @@
+import { Op } from './operators'
 
 /// SECTION: Results
 
@@ -28,6 +29,8 @@ export type BaseResult = Result_base & { type: 'basic' }
 /** A result from a dice-based expression. */
 export type DiceResult = Result_base & {
   type: 'dice'
+  /** The expression evaluated to get this result. */
+  source: Op
   /** A list of individual roll numbers. */
   rolls: number[]
   /** The number of expected rolls. Not guaranteed to equal `rolls.length` (see exploding dice in particular). */
@@ -37,6 +40,9 @@ export type DiceResult = Result_base & {
   /** The minimum roll for a single die of the type used for this result. */
   minRoll?: number
 }
+
+export function isBaseResult(result: Result): result is BaseResult { return result.type === 'basic' }
+export function isDiceResult(result: Result): result is DiceResult { return result.type === 'dice' }
 
 /// SECTION: Core expression types
 
@@ -107,3 +113,4 @@ import '../opdefs/dice'
 import '../opdefs/dnd5e'
 import '../opdefs/keep'
 import '../opdefs/reroll'
+

@@ -14,7 +14,7 @@ Ops.registerOp({
     return {
       ...ordRoll[0],
       source: op,
-      prev: [ ordRoll[1], ...orgRoll.prev ]
+      prev: ordRoll
     }
   }
 })
@@ -30,7 +30,7 @@ Ops.registerOp({
     return {
       ...ordRoll[0],
       source: op,
-      prev: [ ordRoll[1], ...orgRoll.prev ]
+      prev: ordRoll
     }
   }
 })
@@ -64,7 +64,11 @@ Ops.registerOp({
   eval: (op, _l) => {
     let l = _l as DiceResult
     if(l.value > l.rolls.length * (typeof l.minRoll !== 'undefined' ? l.minRoll : 1))
-      return l
+      return {
+        ...l,
+        source: op,
+        prev: [ l ]
+      }
 
     let effect = randOf(wildMagicEffects),
         effectRolls: Result[] = []
@@ -78,6 +82,8 @@ Ops.registerOp({
 
     return {
       ...l,
+      source: op,
+      prev: [ l ],
       statuses: [
         ...l.statuses||[],
         { fromOp: op.def.name,
