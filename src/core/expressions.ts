@@ -106,11 +106,3 @@ export class Variable extends Expr {
   }
 }
 
-/// SECTION: Built-in operator definitions
-
-import '../opdefs/math'
-import '../opdefs/dice'
-import '../opdefs/dnd5e'
-import '../opdefs/keep'
-import '../opdefs/reroll'
-

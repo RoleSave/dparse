@@ -1,8 +1,7 @@
 import describe, { testConsistency } from "gruetest";
 import { wildMagicEffects } from "../opdefs/dnd5e";
-import { parseExpr, parseExprList } from "../core/parse";
-import { DiceResult, isDiceResult } from "../core/expressions";
-import { Op } from '../core/operators'
+import { isDiceResult, Op, parseExpr, parseExprList } from "../index";
+import { DiceResult } from '../core/expressions'
 import { removeHighest, removeLowest } from "../util/functions";
 
 describe('Dice functions', (it,todo) => {
