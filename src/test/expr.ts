@@ -14,6 +14,11 @@ describe('Expression system', it => {
       mod: parseExpr('3 % 2'),
       pow: parseExpr('3 ^ 2'),
       par: parseExpr('3 * (2+2)'),
+      neg: parseExpr('-2'),
+      ang: parseExpr('3+-2'),
+      sng: parseExpr('3--2'),
+      mng: parseExpr('3*-2'),
+      dng: parseExpr('3/-2'),
     }
 
     assert.equal(exprs.const.toString(), '3', 'const parse')
@@ -25,6 +30,11 @@ describe('Expression system', it => {
     assert.equal(exprs.mod.toString(), '3%2', 'mod parse')
     assert.equal(exprs.pow.toString(), '3^2', 'pow parse')
     assert.equal(exprs.par.toString(), '3*(2+2)', 'par parse')
+    assert.equal(exprs.neg.toString(), '-2', 'neg parse')
+    assert.equal(exprs.ang.toString(), '3+-2', 'ang parse')
+    assert.equal(exprs.sng.toString(), '3--2', 'sng parse')
+    assert.equal(exprs.mng.toString(), '3*-2', 'mng parse')
+    assert.equal(exprs.dng.toString(), '3/-2', 'dng parse')
 
     assert.equal(exprs.const.eval().value, 3, 'const eval')
     assert.equal(exprs.add.eval().value, 5, 'add eval')
@@ -35,6 +45,11 @@ describe('Expression system', it => {
     assert.equal(exprs.mod.eval().value, 1, 'mod eval')
     assert.equal(exprs.pow.eval().value, 9, 'pow eval')
     assert.equal(exprs.par.eval().value, 12, 'par eval')
+    assert.equal(exprs.neg.eval().value, -2, 'neg eval')
+    assert.equal(exprs.ang.eval().value, 1, 'ang eval')
+    assert.equal(exprs.sng.eval().value, 5, 'sng eval')
+    assert.equal(exprs.mng.eval().value, -6, 'mng eval')
+    assert.equal(exprs.dng.eval().value, -2, 'dng eval')
   })
 
   it('should properly parse/eval expression lists', assert => {

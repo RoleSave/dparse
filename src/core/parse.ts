@@ -37,6 +37,13 @@ function lex(expr: string): Token[] {
       tokens.push({ type: 'close', text: c })
       continue lex }
 
+    if(c === '-' && /\d/.test(from[0]) && !['const','var','close'].includes(tokens[tokens.length-1]?.type)) {
+      let num = from.match(/(^\d+)/)![1]
+      from = from.slice(num.length)
+      tokens.push({ type: 'const', text: '-'+num })
+      continue lex
+    }
+
     if(/\d/.test(c)) {
       let num = (c+from).match(/(^\d+)/)![1]
       from = from.slice(num.length-1)
