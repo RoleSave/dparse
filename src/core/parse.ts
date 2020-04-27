@@ -1,5 +1,5 @@
 import { Expr, Group, Const, Variable } from "./expressions";
-import { Operators as Ops, PostOp, PostOpDef, BinOpDef, BinOp, OpDef } from './operators'
+import { Operators as Ops, OpDef, PreOp, PreOpDef, PostOp, PostOpDef, BinOp, BinOpDef } from './operators'
 
 /// SECTION: Definitions
 
@@ -127,6 +127,18 @@ function collapse(tokens: Token[]): Token {
       for(let op of Ops.getOpsForPrec(prec)) if(t.opdef?.name == op.name) {
         found = true
         switch(op.type) {
+          case 'preop': 
+            if(!next()) throw `Expected right-hand argument to operator ${curr().text}`
+            tokens = [
+              ...tokens.slice(0, ci), 
+              { type: 'op', 
+                text: t.text+next().text, 
+                bound: [next()], 
+                opdef: t.opdef }, 
+              ...tokens.slice(ci+2)
+            ]
+            break
+
           case 'postop': 
             if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
             tokens = [
@@ -171,6 +183,9 @@ function convert(ast: Token): Expr {
   if(ast.type == 'op') {
     if(!ast.bound?.length) throw `Encountered unbound operator ${ast.text}`
     switch(ast.opdef!.type) {
+      case 'preop': 
+        if(ast.bound.length < 1) throw `Not enough tokens bound for operator ${ast.text}, expected 1`
+        return new PreOp(ast.opdef as PreOpDef, convert(ast.bound[0]))
       case 'postop': 
         if(ast.bound.length < 1) throw `Not enough tokens bound for operator ${ast.text}, expected 1`
         return new PostOp(ast.opdef as PostOpDef, convert(ast.bound[0]))

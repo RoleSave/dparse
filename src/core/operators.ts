@@ -41,7 +41,7 @@ export const Operators = new OperatorReg
 export default Operators
 
 /** All data required to define a new operator. */
-export type OpDef = PostOpDef|BinOpDef
+export type OpDef = PreOpDef|PostOpDef|BinOpDef
 type OpDef_base = {
   /** The internal name of the operator. Must be unique. */
   name: string
@@ -66,6 +66,15 @@ type OpDef_base = {
   cacheable?: boolean
 }
 
+/** A unary operator which comes before its operand. */
+export type PreOpDef = OpDef_base & {
+  type: 'preop'
+  /** If present, throws an error if passed the wrong type of `Result`. */
+  requireType?: Result['type']
+  /** The body of the operator. */
+  eval: (op: PreOp, rhs: Result, ctx: ExprCtx) => Result
+}
+
 /** A unary operator which comes after its operand. */
 export type PostOpDef = OpDef_base & {
   type: 'postop'
@@ -87,7 +96,31 @@ export type BinOpDef = OpDef_base & {
 }
 
 /** An operator-based expression. */
-export type Op = PostOp|BinOp
+export type Op = PreOp|PostOp|BinOp
+
+/** A unary prefix operator. */
+export class PreOp extends Expr {
+  constructor(
+    /** The operator definition. */
+    readonly def: PreOpDef,
+    /** The right-hand operand. */
+    readonly rhs: Expr
+  ) { super(!!def.cacheable && rhs.cacheable) }
+
+  toString(ctx?: ExprCtx) { return `${this.def.display || this.def.text}${this.rhs.toString(ctx)}` }
+  protected performEval(ctx: ExprCtx): Result {
+    let l = this.rhs.eval(ctx)
+    if(this.def.requireType && this.def.requireType !== l.type)
+      throw `Cannot perform op ${this.def.text} on result of type ${l.type}`
+    return this.def.eval(this, l, ctx)
+  }
+
+  /** Create a copy of this operator, optionally replacing the operands. */
+  clone(rhs?: Expr|number) { 
+    if(typeof rhs === 'number') rhs = new Const(rhs)
+    return new PreOp(this.def, rhs || this.rhs) 
+  }
+}
 
 /** A unary postfix operator. */
 export class PostOp extends Expr {
@@ -105,7 +138,6 @@ export class PostOp extends Expr {
       throw `Cannot perform op ${this.def.text} on result of type ${l.type}`
     return this.def.eval(this, l, ctx)
   }
-
 
   /** Create a copy of this operator, optionally replacing the operands. */
   clone(lhs?: Expr|number) { 
