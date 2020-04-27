@@ -1,0 +1,504 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>PreOp | dparse</title>
+	<meta name="description" content="Documentation for dparse">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">dparse</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_core_operators_.html">&quot;core/operators&quot;</a>
+				</li>
+				<li>
+					<a href="_core_operators_.preop.html">PreOp</a>
+				</li>
+			</ul>
+			<h1>Class PreOp</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A unary prefix operator.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">PreOp</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="_core_operators_.preop.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_core_operators_.preop.html#cacheable" class="tsd-kind-icon">cacheable</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_core_operators_.preop.html#def" class="tsd-kind-icon">def</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_core_operators_.preop.html#rhs" class="tsd-kind-icon">rhs</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_core_operators_.preop.html#clone" class="tsd-kind-icon">clone</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_core_operators_.preop.html#eval" class="tsd-kind-icon">eval</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-protected"><a href="_core_operators_.preop.html#performeval" class="tsd-kind-icon">perform<wbr>Eval</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_core_operators_.preop.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="_core_operators_.preop.html#simplifyctx" class="tsd-kind-icon">simplify<wbr>Ctx</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Pre<wbr>Op<span class="tsd-signature-symbol">(</span>def<span class="tsd-signature-symbol">: </span><a href="../modules/_core_operators_.html#preopdef" class="tsd-signature-type">PreOpDef</a>, rhs<span class="tsd-signature-symbol">: </span><a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_core_operators_.preop.html" class="tsd-signature-type">PreOp</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="_core_expressions_.expr.html">Expr</a>.<a href="_core_expressions_.expr.html#constructor">constructor</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/operators.ts#L110">core/operators.ts:110</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>def: <a href="../modules/_core_operators_.html#preopdef" class="tsd-signature-type">PreOpDef</a></h5>
+								</li>
+								<li>
+									<h5>rhs: <a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_core_operators_.preop.html" class="tsd-signature-type">PreOp</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="cacheable" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> cacheable</h3>
+					<div class="tsd-signature tsd-kind-icon">cacheable<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_operators_.preop.html">PreOp</a>.<a href="_core_operators_.preop.html#cacheable">cacheable</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/expressions.ts#L55">core/expressions.ts:55</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Whether the result of this expression can be reliably cached.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="def" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> def</h3>
+					<div class="tsd-signature tsd-kind-icon">def<span class="tsd-signature-symbol">:</span> <a href="../modules/_core_operators_.html#preopdef" class="tsd-signature-type">PreOpDef</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/operators.ts#L113">core/operators.ts:113</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The operator definition.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="rhs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> rhs</h3>
+					<div class="tsd-signature tsd-kind-icon">rhs<span class="tsd-signature-symbol">:</span> <a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/operators.ts#L115">core/operators.ts:115</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The right-hand operand.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="clone" class="tsd-anchor"></a>
+					<h3>clone</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">clone<span class="tsd-signature-symbol">(</span>rhs<span class="tsd-signature-symbol">?: </span><a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_core_operators_.preop.html" class="tsd-signature-type">PreOp</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/operators.ts#L127">core/operators.ts:127</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Create a copy of this operator, optionally replacing the operands.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> rhs: <a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_core_operators_.preop.html" class="tsd-signature-type">PreOp</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="eval" class="tsd-anchor"></a>
+					<h3>eval</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">eval<span class="tsd-signature-symbol">(</span>ctx<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_core_expressions_.html#result" class="tsd-signature-type">Result</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_core_operators_.preop.html">PreOp</a>.<a href="_core_operators_.preop.html#eval">eval</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/expressions.ts#L61">core/expressions.ts:61</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Evaluate this expression, or return the cached result if applicable.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> ctx: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An <code>ExprCtx</code> from which to pull variables. Numbers will automatically be wrapped in <code>Const</code>.</p>
+									</div>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-index-signature">
+											<h5><span class="tsd-signature-symbol">[</span>k: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_core_expressions_.html#result" class="tsd-signature-type">Result</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
+					<a name="performeval" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> perform<wbr>Eval</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">perform<wbr>Eval<span class="tsd-signature-symbol">(</span>ctx<span class="tsd-signature-symbol">: </span><a href="../modules/_core_expressions_.html#exprctx" class="tsd-signature-type">ExprCtx</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_core_expressions_.html#result" class="tsd-signature-type">Result</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="_core_expressions_.expr.html">Expr</a>.<a href="_core_expressions_.expr.html#performeval">performEval</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/operators.ts#L119">core/operators.ts:119</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>ctx: <a href="../modules/_core_expressions_.html#exprctx" class="tsd-signature-type">ExprCtx</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_core_expressions_.html#result" class="tsd-signature-type">Result</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="tostring" class="tsd-anchor"></a>
+					<h3>to<wbr>String</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">to<wbr>String<span class="tsd-signature-symbol">(</span>ctx<span class="tsd-signature-symbol">?: </span><a href="../modules/_core_expressions_.html#exprctx" class="tsd-signature-type">ExprCtx</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="_core_expressions_.expr.html">Expr</a>.<a href="_core_expressions_.expr.html#tostring">toString</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/operators.ts#L118">core/operators.ts:118</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> ctx: <a href="../modules/_core_expressions_.html#exprctx" class="tsd-signature-type">ExprCtx</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="simplifyctx" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> simplify<wbr>Ctx</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">simplify<wbr>Ctx<span class="tsd-signature-symbol">(</span>ctx<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_core_expressions_.html#exprctx" class="tsd-signature-type">ExprCtx</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_core_operators_.preop.html">PreOp</a>.<a href="_core_operators_.preop.html#simplifyctx">simplifyCtx</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/RoleSave/dparse/blob/aaf9cbf/src/core/expressions.ts#L71">core/expressions.ts:71</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Wrap numbers in <code>Const</code> for <code>ExprCtx</code>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>ctx: <span class="tsd-signature-symbol">{}</span></h5>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-index-signature">
+											<h5><span class="tsd-signature-symbol">[</span>k: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="_core_expressions_.expr.html" class="tsd-signature-type">Expr</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_core_expressions_.html#exprctx" class="tsd-signature-type">ExprCtx</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_core_expressions_.html">&quot;core/expressions&quot;</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_core_operators_.html">&quot;core/operators&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_core_parse_.html">&quot;core/parse&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_opdefs_dice_.html">&quot;opdefs/dice&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_opdefs_dnd5e_.html">&quot;opdefs/dnd5e&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_opdefs_keep_.html">&quot;opdefs/keep&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_opdefs_math_.html">&quot;opdefs/math&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_opdefs_reroll_.html">&quot;opdefs/reroll&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_test_expr_.html">&quot;test/expr&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_test_func_.html">&quot;test/func&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/_util_functions_.html">&quot;util/functions&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_core_operators_.binop.html" class="tsd-kind-icon">Bin<wbr>Op</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-is-not-exported">
+						<a href="_core_operators_.operatorreg.html" class="tsd-kind-icon">Operator<wbr>Reg</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_core_operators_.postop.html" class="tsd-kind-icon">Post<wbr>Op</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="_core_operators_.preop.html" class="tsd-kind-icon">Pre<wbr>Op</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_core_operators_.preop.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="_core_operators_.preop.html#cacheable" class="tsd-kind-icon">cacheable</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_core_operators_.preop.html#def" class="tsd-kind-icon">def</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_core_operators_.preop.html#rhs" class="tsd-kind-icon">rhs</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_core_operators_.preop.html#clone" class="tsd-kind-icon">clone</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_core_operators_.preop.html#eval" class="tsd-kind-icon">eval</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
+								<a href="_core_operators_.preop.html#performeval" class="tsd-kind-icon">perform<wbr>Eval</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_core_operators_.preop.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="_core_operators_.preop.html#simplifyctx" class="tsd-kind-icon">simplify<wbr>Ctx</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_core_operators_.html#binopdef" class="tsd-kind-icon">Bin<wbr>OpDef</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_core_operators_.html#op" class="tsd-kind-icon">Op</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_core_operators_.html#opdef" class="tsd-kind-icon">Op<wbr>Def</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+						<a href="../modules/_core_operators_.html#opdef_base" class="tsd-kind-icon">Op<wbr>Def_<wbr>base</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_core_operators_.html#postopdef" class="tsd-kind-icon">Post<wbr>OpDef</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_core_operators_.html#preopdef" class="tsd-kind-icon">Pre<wbr>OpDef</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_core_operators_.html#operators" class="tsd-kind-icon">Operators</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

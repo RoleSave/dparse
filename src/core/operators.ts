@@ -30,7 +30,7 @@ class OperatorReg {
   getOpList(): OpDef[] { return Object.values(this.opRegistry) }
 
   /** Get a list of operator defintions matching the given precedence. */
-  getOpsForPrec(prec: number) { 
+  getOpsForPrec(prec: number): OpDef[] { 
     return this.getOpList().filter(op => op.prec == prec) 
   }
   

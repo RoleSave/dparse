@@ -6,7 +6,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "tsc --build && npm explore gruetest -- npm test -- ./lib/test",
-    "prepack": "rmdir /s /q lib && tsc --build && npm test"
+    "prepack": "rmdir /s /q lib && tsc --build && npm test",
+    "gendocs": "node node_modules/typedoc/bin/typedoc --out docs src"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^13.13.0",
     "gruetest": "^1.0.2",
+    "typedoc": "^0.17.6",
     "typescript": "^3.8.3"
   }
 }

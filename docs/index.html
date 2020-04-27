@@ -1,0 +1,367 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>dparse</title>
+	<meta name="description" content="Documentation for dparse">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">dparse</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>dparse</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#dparse" id="dparse" style="color: inherit; text-decoration: none;">
+					<h1>dparse</h1>
+				</a>
+				<p>A Typescript dice notation parser and evaluator. Originally created for my Discord dice bot, Rockfall, before being separated out into its own library.</p>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<p>Run the following command to install this library:</p>
+				<pre><code>npm <span class="hljs-keyword">install</span> dparse</code></pre><p>Or build it from source with the following steps:</p>
+				<ol>
+					<li>Clone the Github repository.</li>
+					<li>Run <code>npm install</code> to download dependencies.</li>
+					<li>Run <code>npm pack</code> to generate a tarball.</li>
+					<li>Run <code>npm install &lt;tarball path&gt;</code> in the project you wish to install in.</li>
+				</ol>
+				<a href="#api" id="api" style="color: inherit; text-decoration: none;">
+					<h2>API</h2>
+				</a>
+				<p>The core of <code>dparse</code>&#39;s functionality comes from two functions: <code>parseExpr</code> and <code>parseExprList</code>. The former parses a given expression and returns an <code>Expr</code>, and the latter parses a given comma-separated list of expressions and returns an <code>Expr[]</code>. Once you have an <code>Expr</code>, you can call <code>Expr#eval()</code> on it to retrieve a <code>Result</code>, which contains the evaluated result of the expression. </p>
+				<p><strong>Subsequent calls to <code>Expr#eval()</code> are not guaranteed to return equivalent <code>Result</code> instances.</strong> Since dice are inherently random, any expression involving dice may return a different <code>Result#value</code>.</p>
+				<p>You can also add your own custom dice types, dice functions, and operators with the <code>Operators.registerOp</code> function.</p>
+				<a href="#supported-syntax" id="supported-syntax" style="color: inherit; text-decoration: none;">
+					<h2>Supported Syntax</h2>
+				</a>
+				<p><code>dparse</code> supports most basic mathematical and dice notation out of the box. It is built around a full expression parser with extensions for dice notation, and as such can handle essentially any combination of the below by simply performing mathematical operations on the results of rolls, as opposed to the strict <code>NdS+M</code> format that many dice calculators use. All syntax is case- and whitespace-insensitive except for variable names.</p>
+				<table>
+					<thead>
+						<tr>
+							<th align="left">Math function</th>
+							<th align="center">Syntax</th>
+							<th align="left">Description</th>
+							<th align="left">Example</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td align="left">Addition</td>
+							<td align="center"><code>+</code></td>
+							<td align="left">Adds two numbers.</td>
+							<td align="left"><code>3 + 2</code></td>
+						</tr>
+						<tr>
+							<td align="left">Subtraction</td>
+							<td align="center"><code>-</code></td>
+							<td align="left">Subtracts two numbers.</td>
+							<td align="left"><code>3 - 2</code></td>
+						</tr>
+						<tr>
+							<td align="left">Multiplication</td>
+							<td align="center"><code>*</code> or <code>x</code></td>
+							<td align="left">Multiplies two numbers.</td>
+							<td align="left"><code>3 * 2</code></td>
+						</tr>
+						<tr>
+							<td align="left">Division</td>
+							<td align="center"><code>/</code></td>
+							<td align="left">Divides two numbers, rounding down.</td>
+							<td align="left"><code>3 / 2</code></td>
+						</tr>
+						<tr>
+							<td align="left">Remainder</td>
+							<td align="center"><code>%</code></td>
+							<td align="left">Divides two numbers and returns the remainder.</td>
+							<td align="left"><code>3 % 2</code></td>
+						</tr>
+						<tr>
+							<td align="left">Exponentiation</td>
+							<td align="center"><code>^</code></td>
+							<td align="left">Raises a number to the power of another.</td>
+							<td align="left"><code>3 ^ 2</code></td>
+						</tr>
+						<tr>
+							<td align="left">Grouping</td>
+							<td align="center"><code>()</code></td>
+							<td align="left">Overrides the standard order of operations.</td>
+							<td align="left"><code>3 * (2 + 2)</code></td>
+						</tr>
+						<tr>
+							<td align="left">Equation lists</td>
+							<td align="center"><code>,</code></td>
+							<td align="left">Multiple expressions in one parse. Only works with <code>parseExprList</code>, not <code>parseExpr</code>.</td>
+							<td align="left"><code>2+2, 3^2</code></td>
+						</tr>
+						<tr>
+							<td align="left">Variables</td>
+							<td align="center"><code>$name</code></td>
+							<td align="left">Include a variable from context. Requires an <code>ExprCtx</code> to be passed to <code>Expr#eval</code>.</td>
+							<td align="left"><code>1d20 + $dex</code></td>
+						</tr>
+				</tbody></table>
+				<table>
+					<thead>
+						<tr>
+							<th align="left">Dice notation</th>
+							<th align="center">Syntax</th>
+							<th align="left">Description</th>
+							<th align="left">Example</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td align="left">Standard dice</td>
+							<td align="center"><code>NdS</code></td>
+							<td align="left"><code>N</code> basic dice with <code>S</code> sides each.</td>
+							<td align="left"><code>4d6</code></td>
+						</tr>
+						<tr>
+							<td align="left"><a href="https://en.wikipedia.org/wiki/Fudge_(role-playing_game_system)#Fudge_dice">Fate dice</a></td>
+							<td align="center"><code>NdF</code></td>
+							<td align="left"><code>N</code> Fate dice (can be -1, 0, or 1).</td>
+							<td align="left"><code>4dF</code></td>
+						</tr>
+						<tr>
+							<td align="left">Percentile dice</td>
+							<td align="center"><code>Nd%</code></td>
+							<td align="left"><code>N</code> percentile dice (equivalent to <code>Nd100</code>).</td>
+							<td align="left"><code>4d%</code></td>
+						</tr>
+				</tbody></table>
+				<a href="#dice-functions" id="dice-functions" style="color: inherit; text-decoration: none;">
+					<h3>Dice Functions</h3>
+				</a>
+				<p>Dice functions can be added after any dice notation and modify the results of the roll. The available dice functions are listed below. You can also chain dice functions, for example <code>4d6!adv dc20</code>.</p>
+				<table>
+					<thead>
+						<tr>
+							<th align="left">Dice function</th>
+							<th align="center">Syntax</th>
+							<th align="left">Description</th>
+							<th align="left">Example</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td align="left">Exploding dice</td>
+							<td align="center"><code>!</code></td>
+							<td align="left">Recursively roll an extra die for each maximum roll.</td>
+							<td align="left"><code>4d6!</code></td>
+						</tr>
+						<tr>
+							<td align="left">Advantage</td>
+							<td align="center"><code>adv</code></td>
+							<td align="left">Roll twice and take the higher total.</td>
+							<td align="left"><code>4d6adv</code></td>
+						</tr>
+						<tr>
+							<td align="left">Disadvantage</td>
+							<td align="center"><code>dis</code></td>
+							<td align="left">Roll twice and take the lower total.</td>
+							<td align="left"><code>4d6dis</code></td>
+						</tr>
+						<tr>
+							<td align="left">Wild Magic</td>
+							<td align="center"><code>wm</code></td>
+							<td align="left">A <a href="http://dnd5e.wikidot.com/sorcerer:wild-magic">random effect</a> occurs on the lowest possible roll.</td>
+							<td align="left"><code>4d6wm</code></td>
+						</tr>
+						<tr>
+							<td align="left">Keep high</td>
+							<td align="center"><code>khN</code></td>
+							<td align="left">Keep the highest <code>N</code> dice.</td>
+							<td align="left"><code>4d6kh3</code></td>
+						</tr>
+						<tr>
+							<td align="left">Keep low</td>
+							<td align="center"><code>klN</code></td>
+							<td align="left">Keep the lowest <code>N</code> dice.</td>
+							<td align="left"><code>4d6kl3</code></td>
+						</tr>
+						<tr>
+							<td align="left">Reroll high</td>
+							<td align="center"><code>rhN</code></td>
+							<td align="left">Reroll the highest <code>N</code> dice.</td>
+							<td align="left"><code>4d6rh3</code></td>
+						</tr>
+						<tr>
+							<td align="left">Reroll low</td>
+							<td align="center"><code>rlN</code></td>
+							<td align="left">Reroll the lowest <code>N</code> dice.</td>
+							<td align="left"><code>4d6rl3</code></td>
+						</tr>
+						<tr>
+							<td align="left">Reroll above</td>
+							<td align="center"><code>r&gt;N</code></td>
+							<td align="left">Reroll any dice above or at a given threshold <code>N</code> once.</td>
+							<td align="left"><code>4d6r&gt;3</code></td>
+						</tr>
+						<tr>
+							<td align="left">Reroll below</td>
+							<td align="center"><code>r&lt;N</code></td>
+							<td align="left">Reroll any dice below or at a given threshold <code>N</code> once.</td>
+							<td align="left"><code>4d6r&lt;3</code></td>
+						</tr>
+						<tr>
+							<td align="left">Reroll above (recursive)</td>
+							<td align="center"><code>r!&gt;N</code></td>
+							<td align="left">Reroll any dice above or at a given threshold <code>N</code> until no dice meet the threshold.</td>
+							<td align="left"><code>4d6r!&gt;3</code></td>
+						</tr>
+						<tr>
+							<td align="left">Reroll below (recursive)</td>
+							<td align="center"><code>r!&lt;N</code></td>
+							<td align="left">Reroll any dice below or at a given threshold <code>N</code> until no dice meet the threshold.</td>
+							<td align="left"><code>4d6r!&lt;3</code></td>
+						</tr>
+				</tbody></table>
+				<a href="#special-functions" id="special-functions" style="color: inherit; text-decoration: none;">
+					<h3>Special Functions</h3>
+				</a>
+				<p>Some dice functions can be applied to any expression, not just dice. This is to allow them to take things like modifiers into account - as such, they have the lowest precedence of any operator, and will always apply to as much of the overall equation as possible. This applies to both sides if applicable (for example, <code>1d20+3 dc 5+5</code> will be read as <code>(1d20+3) dc (5+5)</code>, not <code>(1d20)+(3 dc 5)+5</code>). If you need to work with the results of these functions themselves, you can use parentheses to explicitly define grouping. </p>
+				<table>
+					<thead>
+						<tr>
+							<th align="left">Dice function</th>
+							<th align="center">Syntax</th>
+							<th align="left">Description</th>
+							<th align="left">Example</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td align="left">Difficulty class (DC)</td>
+							<td align="center"><code>dcN</code></td>
+							<td align="left">Set a pass/fail threshold for the roll.</td>
+							<td align="left"><code>1d20+3 dc15</code></td>
+						</tr>
+				</tbody></table>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_core_expressions_.html">&quot;core/expressions&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_core_operators_.html">&quot;core/operators&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_core_parse_.html">&quot;core/parse&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_opdefs_dice_.html">&quot;opdefs/dice&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_opdefs_dnd5e_.html">&quot;opdefs/dnd5e&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_opdefs_keep_.html">&quot;opdefs/keep&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_opdefs_math_.html">&quot;opdefs/math&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_opdefs_reroll_.html">&quot;opdefs/reroll&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_test_expr_.html">&quot;test/expr&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_test_func_.html">&quot;test/func&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_util_functions_.html">&quot;util/functions&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
