@@ -31,9 +31,13 @@ class OperatorReg {
   }
   
   /** Returns true if the given `Expr` is an `Op`. */
-  isOp(expr: Expr): expr is Op {
-    return expr instanceof PostOp || expr instanceof BinOp
-  }
+  isOp(expr: Expr): expr is Op { return expr instanceof PostOp || expr instanceof BinOp }
+  /** Returns true if the given `Expr` is a `PreOp`. */
+  isPreOp(expr: Expr): expr is PreOp { return this.isOp(expr) && expr.def.type === 'preop' }
+  /** Returns true if the given `Expr` is a `PostOp`. */
+  isPostOp(expr: Expr): expr is PostOp { return this.isOp(expr) && expr.def.type === 'postop' }
+  /** Returns true if the given `Expr` is a `BinOp`. */
+  isBinOp(expr: Expr): expr is BinOp { return this.isOp(expr) && expr.def.type === 'binop' }
 }
 
 /** Operator-related registry and utility functions. */
