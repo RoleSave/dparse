@@ -1,5 +1,5 @@
 import { Expr, Group, Const, Variable } from "./expressions";
-import { Operators as Ops, OpDef, PreOp, PreOpDef, PostOp, PostOpDef, BinOp, BinOpDef } from './operators'
+import { Operators, OpDef, PreOp, PreOpDef, PostOp, PostOpDef, BinOp, BinOpDef } from './operators'
 
 /// SECTION: Definitions
 
@@ -60,7 +60,7 @@ function lex(expr: string): Token[] {
       continue lex
     }
 
-    for(let op of Ops.getOpList().sort((a,b) => b.text.length - a.text.length)) {
+    for(let op of Operators.getOpList().sort((a,b) => b.text.length - a.text.length)) {
       if((c+from).startsWith(op.text.toLowerCase())) {
         from = from.slice(op.text.length-1)
         tokens.push({ type: 'op', text: op.text, opdef: op })
@@ -119,12 +119,12 @@ function collapse(tokens: Token[]): Token {
 
   // Operators
 
-  for(let prec = Ops.highestOpPrec; prec >= Ops.lowestOpPrec; prec--) {
+  for(let prec = Operators.highestOpPrec; prec >= Operators.lowestOpPrec; prec--) {
     while(t = curr()) {
       if(t.type !== 'op') { advance(); continue }
 
       let found = false
-      for(let op of Ops.getOpsForPrec(prec)) if(t.opdef?.name == op.name) {
+      for(let op of Operators.getOpsForPrec(prec)) if(t.opdef?.name == op.name) {
         found = true
         switch(op.type) {
           case 'preop': 

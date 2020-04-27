@@ -1,6 +1,6 @@
-import { Operators as Ops, BinOpDef } from "../core/operators";
+import { Operators, BinOpDef } from "../core/operators";
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'add',
   type: 'binop',
   text: '+',
@@ -14,7 +14,7 @@ Ops.registerOp({
   })
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'sub',
   type: 'binop',
   text: '-',
@@ -41,10 +41,10 @@ let mul: BinOpDef = {
     prev: [l,r]
   })
 }
-Ops.registerOp({ ...mul, name: 'mul_*', text: '*' })
-Ops.registerOp({ ...mul, name: 'mul_x', text: 'x' })
+Operators.registerOp({ ...mul, name: 'mul_*', text: '*' })
+Operators.registerOp({ ...mul, name: 'mul_x', text: 'x' })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'div',
   type: 'binop',
   text: '/',
@@ -58,7 +58,7 @@ Ops.registerOp({
   })
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'mod',
   type: 'binop',
   text: '%',
@@ -72,7 +72,7 @@ Ops.registerOp({
   })
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'pow',
   type: 'binop',
   text: '^',

@@ -1,9 +1,9 @@
 import { Result, DiceResult } from "../core/expressions"
-import { Operators as Ops } from "../core/operators"
+import { Operators } from "../core/operators"
 import { randOf } from "../util/functions"
 import { parseExpr } from "../core/parse"
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'advantage',
   type: 'postop',
   text: 'adv',
@@ -19,7 +19,7 @@ Ops.registerOp({
   }
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'disadvantage',
   type: 'postop',
   text: 'dis',
@@ -35,7 +35,7 @@ Ops.registerOp({
   }
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'difficulty_class',
   type: 'binop',
   text: 'dc',
@@ -54,7 +54,7 @@ Ops.registerOp({
   })
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'wild_magic',
   type: 'postop',
   text: 'wm',

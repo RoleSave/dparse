@@ -1,5 +1,5 @@
 import { DiceResult, Result } from "../core/expressions"
-import { Operators as Ops, BinOp } from "../core/operators"
+import { Operators, BinOp } from "../core/operators"
 import { removeLowest, removeHighest, sum } from "../util/functions"
 
 const keep = (keep: (rs: number[], v: number) => number[]) => (op: BinOp, _l: Result, r: Result) => {
@@ -14,7 +14,7 @@ const keep = (keep: (rs: number[], v: number) => number[]) => (op: BinOp, _l: Re
   }
 }
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'keep_high',
   type: 'binop',
   text: 'kh',
@@ -23,7 +23,7 @@ Ops.registerOp({
   eval: keep((rs,v) => removeLowest(rs, rs.length-v))
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'keep_low',
   type: 'binop',
   text: 'kl',
@@ -32,7 +32,7 @@ Ops.registerOp({
   eval: keep((rs,v) => removeHighest(rs, rs.length-v))
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'keep_above',
   type: 'binop',
   text: 'k>',
@@ -41,7 +41,7 @@ Ops.registerOp({
   eval: keep((rs,v) => rs.filter(n => n >= v))
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'keep_below',
   type: 'binop',
   text: 'k<',

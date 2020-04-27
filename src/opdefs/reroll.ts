@@ -1,5 +1,5 @@
 import { DiceResult, Result, ExprCtx, } from "../core/expressions"
-import { Operators as Ops, Op, BinOp } from "../core/operators"
+import { Operators, Op, BinOp } from "../core/operators"
 import { removeHighest, removeLowest, sum } from "../util/functions"
 
 const reroll = (keep: (rolls:number[], vs:number) => number[]) => (op: BinOp, _l: Result, r: Result, ctx: ExprCtx): DiceResult => {
@@ -9,7 +9,7 @@ const reroll = (keep: (rolls:number[], vs:number) => number[]) => (op: BinOp, _l
     return { ...l, source: op, prev: [ l, r ] }
 
   let rerollDie: Op|undefined
-  if(Ops.isOp(l.source)) {
+  if(Operators.isOp(l.source)) {
     if(/^reroll_.+_rec/.test(l.source.def.name)) l = l.prev[0] as DiceResult
     rerollDie = (l.source as Op).clone(l.rolls.length - keepRolls.length)
   }
@@ -27,7 +27,7 @@ const reroll = (keep: (rolls:number[], vs:number) => number[]) => (op: BinOp, _l
   }
 }
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'reroll_high',
   type: 'binop',
   text: 'rh',
@@ -36,7 +36,7 @@ Ops.registerOp({
   eval: reroll(removeHighest)
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'reroll_low',
   type: 'binop',
   text: 'rl',
@@ -45,7 +45,7 @@ Ops.registerOp({
   eval: reroll(removeLowest)
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'reroll_above',
   type: 'binop',
   text: 'r>',
@@ -54,7 +54,7 @@ Ops.registerOp({
   eval: reroll((rs,v) => rs.filter(n => n < v))
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'reroll_below',
   type: 'binop',
   text: 'r<',
@@ -63,7 +63,7 @@ Ops.registerOp({
   eval: reroll((rs,v) => rs.filter(n => n > v))
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'reroll_above_rec',
   type: 'binop',
   text: 'r!>',
@@ -78,7 +78,7 @@ Ops.registerOp({
   }
 })
 
-Ops.registerOp({
+Operators.registerOp({
   name: 'reroll_below_rec',
   type: 'binop',
   text: 'r!<',
