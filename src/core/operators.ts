@@ -9,7 +9,11 @@ class OperatorReg {
   private lowprec = 0
 
   /** Register a new operator. */
-  registerOp(op: OpDef) { 
+  registerOp(op: OpDef, redefine: boolean = false) {
+    if(!redefine && this.opRegistry[op.name]) 
+      throw `Attempted to redefine operator ${op.name}; please change the operator's name or set the 'redefine' flag as true in your call to registerOp`
+    if(this.getOpList().filter(o=>o.name!==op.name).map(o=>o.text).includes(op.text))
+      throw `Attempted to define operator ${op.name} with conflicting text representation ${op.text}`
     this.opRegistry[op.name] = op 
     this.highprec = Math.max(this.highprec, op.prec)
     this.lowprec = Math.min(this.lowprec, op.prec)
