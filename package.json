@@ -5,8 +5,11 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "tsc --build && npm explore gruetest -- npm test -- ./lib/test",
-    "prepack": "rmdir /s /q lib && tsc --build && npm test",
+    "build": "tsc --build",
+    "cleanbuild": "rmdir /s /q lib && npm run build",
+    "test": "npm explore gruetest -- npm test -- lib/test",
+    "cleantest": "npm run cleanbuild && npm test",
+    "prepack": "npm run cleanbuild && npm test",
     "gendocs": "node node_modules/typedoc/bin/typedoc --out docs src"
   },
   "repository": {
