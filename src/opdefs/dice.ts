@@ -1,17 +1,16 @@
 import { Result, DiceResult, Const, ExprCtx } from "../core/expressions"
 import { Operators, Op } from "../core/operators"
-import { arrayOf, randInt, sum, randComp } from "../util/functions"
+import { randInt, randComp } from "../util/functions"
 
 const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
   if(l.value > 1000000) throw `Cannot roll more than 1,000,000 dice at once`
   if(l.value < 1) throw `Cannot roll less than 1 die`
   if(r.value < 2) throw `Cannot roll a die with less than 2 sides`
 
-  let rolls = arrayOf(l.value, () => randInt(r.value)+1)
-  return {
+  let rolls; return {
     type: 'dice',
-    rolls: rolls,
-    value: rolls.reduce(sum, 0),
+    rolls: rolls = [...Array(l.value)].map(() => randInt(r.value)+1),
+    value: rolls.reduce((a,b)=>a+b, 0),
     prev: [ l, r ],
     rollCount: l.value,
     maxRoll: r.value
@@ -35,11 +34,10 @@ Operators.registerOp({
     if(l.value > 1000000) throw `Cannot roll more than 1,000,000 dice at once`
     if(l.value < 1) throw `Cannot roll less than 1 die`
 
-    let rolls = arrayOf(l.value, randComp)
-    return {
+    let rolls; return {
       type: 'dice',
-      rolls: rolls,
-      value: rolls.reduce(sum, 0),
+      rolls: rolls = [...Array(l.value)].map(randComp),
+      value: rolls.reduce((a,b)=>a+b, 0),
       source: op,
       prev: [ l ],
       rollCount: l.value,
@@ -55,10 +53,7 @@ Operators.registerOp({
   text: 'd%',
   prec: 4,
   display: 'd100',
-  eval: (op, l) => {
-    const _100 = new Const(100).eval()
-    return { ...simpleDie(l, _100), source: op }
-  }
+  eval: (op, l) => ({ ...simpleDie(l, new Const(100).eval()), source: op })
 })
 
 Operators.registerOp({
@@ -69,28 +64,15 @@ Operators.registerOp({
   requireType: 'dice',
   eval: function explodeDice(op: Op, l: Result, ctx: ExprCtx, depth: number = 0): DiceResult {
     if(depth > 100) throw `Exploding dice exceeded 100 explosion steps; please try again`
-    let result = l as DiceResult
-  
-    let explCount = result.rolls.reduce((n,x) => n+(x===result.maxRoll?1:0),0)
-    if(explCount > 0) {
-      let explDie: Op|undefined
-      if(Operators.isOp(result.source)) explDie = result.source.clone(explCount)
-      if(!explDie) throw `Could not construct new instance of ${result.source} for explosion`
-  
-      let explResult = explodeDice(op, explDie.eval(ctx) as DiceResult, ctx, depth+1),
-          allRolls = [ ...result.rolls, ...explResult.rolls ]
-      return {
-        ...result,
-        rolls: allRolls,
-        value: allRolls.reduce(sum, 0),
-        prev: [ explResult ]
-      }
-    }
-  
-    return {
+    let result = l as DiceResult, explCount = result.rolls.reduce((n,x) => n+(x===result.maxRoll?1:0),0)
+    if(!explCount) return { ...result, source: op, prev: [ result ] }
+    
+    let explResult = explodeDice(op, result.source.clone(explCount).eval(ctx) as DiceResult, ctx, depth+1)
+    let allRolls; return {
       ...result,
-      source: op,
-      prev: [ result ]
+      rolls: allRolls = [ ...result.rolls, ...explResult.rolls ],
+      value: allRolls.reduce((a,b)=>a+b, 0),
+      prev: [ explResult ]
     }
   }
 })

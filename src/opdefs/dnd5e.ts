@@ -1,7 +1,5 @@
-import { Result, DiceResult } from "../core/expressions"
-import { Operators } from "../core/operators"
+import { DiceResult, Operators, parseExpr } from "../index"
 import { randOf } from "../util/functions"
-import { parseExpr } from "../core/parse"
 
 Operators.registerOp({
   name: 'advantage',
@@ -9,13 +7,8 @@ Operators.registerOp({
   text: 'adv',
   prec: 3,
   eval: (op, orgRoll, ctx) => {
-    let advRoll = orgRoll.source.eval(ctx),
-        ordRoll = [orgRoll, advRoll].sort((a,b) => b.value - a.value)
-    return {
-      ...ordRoll[0],
-      source: op,
-      prev: ordRoll
-    }
+    let ordRoll = [orgRoll, orgRoll.source.eval(ctx)].sort((a,b) => b.value - a.value)
+    return { ...ordRoll[0], source: op, prev: ordRoll }
   }
 })
 
@@ -25,13 +18,8 @@ Operators.registerOp({
   text: 'dis',
   prec: 3,
   eval: (op, orgRoll, ctx) => {
-    let advRoll = orgRoll.source.eval(ctx),
-        ordRoll = [orgRoll, advRoll].sort((a,b) => a.value - b.value)
-    return {
-      ...ordRoll[0],
-      source: op,
-      prev: ordRoll
-    }
+    let ordRoll = [orgRoll, orgRoll.source.eval(ctx)].sort((a,b) => a.value - b.value)
+    return { ...ordRoll[0], source: op, prev: ordRoll }
   }
 })
 
@@ -42,12 +30,9 @@ Operators.registerOp({
   prec: -1,
   display: ' dc',
   eval: (op, l, r) => ({
-    ...l,
-    source: op,
-    prev: [ l, r ],
+    ...l, source: op, prev: [ l, r ],
     statuses: [
-      ...l.statuses||[],
-      ...r.statuses||[],
+      ...l.statuses||[], ...r.statuses||[],
       { fromOp: op.def.name,
         text: l.value >= r.value ? 'Pass' : 'Fail' }
     ]
@@ -63,32 +48,16 @@ Operators.registerOp({
   requireType: 'dice',
   eval: (op, _l) => {
     let l = _l as DiceResult
-    if(l.value > l.rolls.length * (typeof l.minRoll !== 'undefined' ? l.minRoll : 1))
-      return {
-        ...l,
-        source: op,
-        prev: [ l ]
-      }
+    if(l.value > l.rolls.length * (l.minRoll ?? 1)) 
+      return { ...l, source: op, prev: [ l ] }
 
-    let effect = randOf(wildMagicEffects),
-        effectRolls: Result[] = []
-    while(effect.indexOf('{') > -1) {
-      let open = effect.indexOf('{'), close = effect.indexOf('}'),
-          dieNot = effect.slice(open+1, close),
-          dieRes = parseExpr(dieNot).eval()
-      effect = effect.slice(0,open)+dieNot+effect.slice(close+1)
-      effectRolls.push(dieRes)
-    }
-
-    return {
-      ...l,
-      source: op,
-      prev: [ l ],
+    let effect; return {
+      ...l, source: op, prev: [ l ],
       statuses: [
         ...l.statuses||[],
         { fromOp: op.def.name,
-          text: effect,
-          results: effectRolls }
+          text: (effect = randOf(wildMagicEffects)).replace(/[{}]/g,''),
+          results: effect.match(/\{(.+)\}/g)?.map(m => parseExpr(m.slice(1,-1)).eval()) }
       ]
     }
   }
