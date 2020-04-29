@@ -16,3 +16,8 @@ export function removeN<T>(arr: T[], n: number, find: (...xs:T[]) => T) {
   for(let i=0;i<n;i++) out.splice(out.indexOf(find(...out)), 1)
   return out
 }
+
+/** Create a shallow clone of an object, optionally replacing properties. */
+export function cloneObj<T>(obj: T, replace: object = {}): T {
+  return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj, replace) as T
+}

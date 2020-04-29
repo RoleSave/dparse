@@ -1,14 +1,16 @@
-import { DiceResult, Result, ExprCtx, } from "../core/expressions"
+import { DiceResult, Result, ExprCtx, Const, } from "../core/expressions"
 import { Operators, BinOp } from "../core/operators"
-import { removeN } from "../util/functions"
+import { removeN, cloneObj } from "../util/functions"
 
 const reroll = (keep: (rolls:number[], vs:number) => number[]) => (op: BinOp, _l: Result, r: Result, ctx: ExprCtx): DiceResult => {
-  let l = _l as DiceResult, keepRolls = keep(l.rolls, r.value), rerollRes
+  let l = _l as DiceResult, keepRolls = keep(l.rolls, r.value), outRolls
   if(keepRolls.length == l.rolls.length) return { ...l, source: op, prev: [ l, r ] }
 
   if(l.source.def.name.endsWith('_rec')) l = l.prev[0] as DiceResult
-  let outRolls; return {
-    ...rerollRes = l.source.clone(l.rolls.length - keepRolls.length).eval(ctx) as DiceResult,
+  let rerollDie = cloneObj(l.source, { lhs: new Const(l.rolls.length - keepRolls.length) }),
+      rerollRes = rerollDie.eval(ctx) as DiceResult
+  return {
+    ...rerollRes,
     source: op,
     rolls: outRolls = [ ...keepRolls, ...rerollRes.rolls ],
     value: outRolls.reduce((a,b)=>a+b, 0),

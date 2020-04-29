@@ -1,6 +1,6 @@
 import { Result, DiceResult, Const, ExprCtx } from "../core/expressions"
 import { Operators, Op } from "../core/operators"
-import { randInt, randComp } from "../util/functions"
+import { randInt, randComp, cloneObj } from "../util/functions"
 
 const simpleDie = (l: Result, r: Result): Omit<DiceResult, 'source'> => {
   if(l.value > 1000000) throw `Cannot roll more than 1,000,000 dice at once`
@@ -63,11 +63,12 @@ Operators.registerOp({
   prec: 3,
   requireType: 'dice',
   eval: function explodeDice(op: Op, l: Result, ctx: ExprCtx, depth: number = 0): DiceResult {
-    if(depth > 100) throw `Exploding dice exceeded 100 explosion steps; please try again`
     let result = l as DiceResult, explCount = result.rolls.reduce((n,x) => n+(x===result.maxRoll?1:0),0)
     if(!explCount) return { ...result, source: op, prev: [ result ] }
-    
-    let explResult = explodeDice(op, result.source.clone(explCount).eval(ctx) as DiceResult, ctx, depth+1)
+    if(depth > 100) throw `Exploding dice exceeded 100 explosion steps; please try again`
+
+    let explDie = cloneObj(result.source, { lhs: new Const(explCount) }),
+        explResult = explodeDice(op, explDie.eval(ctx) as DiceResult, ctx, depth+1)
     let allRolls; return {
       ...result,
       rolls: allRolls = [ ...result.rolls, ...explResult.rolls ],

@@ -122,12 +122,6 @@ export class PreOp extends Expr {
       throw `Cannot perform op ${this.def.text} on result of type ${l.type}`
     return this.def.eval(this, l, ctx)
   }
-
-  /** Create a copy of this operator, optionally replacing the operands. */
-  clone(rhs?: Expr|number) { 
-    if(typeof rhs === 'number') rhs = new Const(rhs)
-    return new PreOp(this.def, rhs || this.rhs) 
-  }
 }
 
 /** A unary postfix operator. */
@@ -145,12 +139,6 @@ export class PostOp extends Expr {
     if(this.def.requireType && this.def.requireType !== l.type)
       throw `Cannot perform op ${this.def.text} on result of type ${l.type}`
     return this.def.eval(this, l, ctx)
-  }
-
-  /** Create a copy of this operator, optionally replacing the operands. */
-  clone(lhs?: Expr|number) { 
-    if(typeof lhs === 'number') lhs = new Const(lhs)
-    return new PostOp(this.def, lhs || this.lhs) 
   }
 }
 
@@ -174,12 +162,5 @@ export class BinOp extends Expr {
     if(this.def.requireTypeR && this.def.requireTypeR !== r.type)
       throw `Cannot perform op ${this.def.text} on result of type ${r.type} (right hand side, ${r.source})`
     return this.def.eval(this, l, r, ctx)
-  }
-  
-  /** Create a copy of this operator, optionally replacing the operands. */
-  clone(lhs?: Expr|number, rhs?: Expr|number) {
-    if(typeof lhs === 'number') lhs = new Const(lhs)
-    if(typeof rhs === 'number') rhs = new Const(rhs)
-    return new BinOp(this.def, lhs || this.lhs, rhs || this.rhs)
   }
 }
