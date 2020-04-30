@@ -187,4 +187,18 @@ describe('Expression system', it => {
     assert.equal(Math.min(...rnums.rlr), 8,  'rlr min')
     assert.equal(Math.max(...rnums.rlr), 12, 'rlr max')
   })
+
+  it('should throw expected parser errors', assert => {
+    assert.throws(() => parseExpr('$'), e => e === 'Expected variable name after $')
+    assert.throws(() => parseExpr('asdfasdf'), e => e === 'Unexpected token a when parsing asdfasdf')
+
+    assert.throws(() => parseExpr(''), e => e === 'Cannot parse empty expression')
+    assert.throws(() => parseExpr('('), e => e === 'Unexpected EOF when parsing (; expected )')
+    assert.throws(() => parseExpr(')'), e => e === 'Unexpected token ) when parsing )')
+    assert.throws(() => parseExpr('2+2 2+2'), e => e === 'Expected operator between tokens 2 and 2')
+
+    assert.throws(() => parseExpr('adv'), e => e === 'Expected left-hand argument to operator adv')
+    assert.throws(() => parseExpr('dc10'), e => e === 'Expected left-hand argument to operator dc')
+    assert.throws(() => parseExpr('10dc'), e => e === 'Expected right-hand argument to operator dc')
+  })
 })

@@ -30,13 +30,16 @@ function lex(expr: string): Token[] {
     from = from.slice(1)
     if(/\s/.test(c)) continue lex
 
-    if(c === '(') { // TODO: /[\(\[\{]/.test(c)
+    // Brackets
+    if(/[\(]/.test(c)) { // TODO: [{
       tokens.push({ type: 'open', text: c })
       continue lex }
-    if(c === ')') { // TODO: /[\)\]\}]/.test(c)
+    if(/[\)]/.test(c)) { // TODO: ]}
       tokens.push({ type: 'close', text: c })
       continue lex }
 
+    // Negative numbers
+    // TODO: Find a way to implement this as a preop instead of a parser exception
     if(c === '-' && /\d/.test(from[0]) && !['const','var','close'].includes(tokens[tokens.length-1]?.type)) {
       let num = from.match(/(^\d+)/)![1]
       from = from.slice(num.length)
@@ -44,6 +47,7 @@ function lex(expr: string): Token[] {
       continue lex
     }
 
+    // Numbers
     if(/\d/.test(c)) {
       let num = (c+from).match(/(^\d+)/)![1]
       from = from.slice(num.length-1)
@@ -51,6 +55,7 @@ function lex(expr: string): Token[] {
       continue lex
     }
 
+    // Variables
     if(c === '$') {
       let vname = from.match(/(^[a-z0-9_]+;?)/i)?.[1]
       from = from.slice(vname?.length)
@@ -60,6 +65,7 @@ function lex(expr: string): Token[] {
       continue lex
     }
 
+    // Operators
     for(let op of Operators.getOpList().sort((a,b) => b.text.length - a.text.length)) {
       if((c+from).startsWith(op.text.toLowerCase())) {
         from = from.slice(op.text.length-1)
@@ -72,6 +78,9 @@ function lex(expr: string): Token[] {
     throw `Unexpected token ${c} when parsing ${expr}`
   }
 
+  let errIndex = -1
+  if((errIndex = tokens.findIndex((t,i) => ['const','var','close'].includes(tokens[i-1]?.type) && ['const','var','open'].includes(t.type))) > -1)
+    throw `Expected operator between tokens ${tokens[errIndex-1].text} and ${tokens[errIndex].text}`
   return tokens
 }
 
@@ -84,84 +93,67 @@ function collapse(tokens: Token[]): Token {
   const curr = () => tokens[ci],
         prev = () => tokens[ci-1],
         next = () => tokens[ci+1],
-        advance = () => ci++,
+        advance = () => ++ci,
         reset = () => ci = 0
-
-  // Consume a set of parentheses, respecting nesting
-  function consumeParens() {
-    let nest = 0, cont = [], open = ci
-    advance()
-    while(t = curr()) {
-      if(t.type == 'open' && t.text === tokens[open].text) nest++
-      if(t.type == 'close' && t.text === matchParen[tokens[open].text]) nest--
-      if(nest < 0) break
-      cont.push(t)
-      advance()
-    }
-    advance()
-
-    tokens = [
-      ...tokens.slice(0, open), 
-      { type: 'group', 
-        text: `(${cont.map(t=>t.text).join('')})`, 
-        bound: [collapse(cont)] }, 
-      ...tokens.slice(ci)
-    ]
-    ci = open+1
-  }
 
   // Parentheses
   while(t = curr()) {
-    if(t.type == 'open') consumeParens()
-    else if(t.type == 'close') throw `Unexpected token ) when parsing ${tokens.map(t=>t.text).join('')}`
-    else advance()
+    if(t.type == 'close') throw `Unexpected token ${t.text} when parsing ${tokens.map(t=>t.text).join('')}`
+    if(t.type == 'open') {
+      let nest = 0, cont = [], open = ci,
+          openText = tokens[open].text,
+          closeText = matchParen[tokens[open].text]
+      while(t = next()) {
+        if(t.type == 'open' && t.text === openText) nest++
+        if(t.type == 'close' && t.text === closeText) nest--
+        if(nest < 0) break
+        cont.push(t)
+        advance()
+      }
+  
+      if(nest >= 0) throw `Unexpected EOF when parsing ${tokens.map(t=>t.text).join('')}; expected ${closeText}`
+      tokens.splice(open, cont.length+2, {
+        type: 'group',
+        text: `${openText}${cont.map(t=>t.text).join('')})${closeText}`, 
+        bound: [collapse(cont)] })
+      ci = open+1
+    } else advance()
   } reset()
 
   // Operators
-
   for(let prec = Operators.highestOpPrec; prec >= Operators.lowestOpPrec; prec--) {
     while(t = curr()) {
       if(t.type !== 'op') { advance(); continue }
 
       let found = false
-      for(let op of Operators.getOpsForPrec(prec)) if(t.opdef?.name == op.name) {
-        found = true
+      for(let op of Operators.getOpsForPrec(prec)) if(found = t.opdef?.name == op.name) {
         switch(op.type) {
           case 'preop': 
-            if(!next()) throw `Expected right-hand argument to operator ${curr().text}`
-            tokens = [
-              ...tokens.slice(0, ci), 
-              { type: 'op', 
-                text: t.text+next().text, 
-                bound: [next()], 
-                opdef: t.opdef }, 
-              ...tokens.slice(ci+2)
-            ]
+            if(!next()) throw `Expected right-hand argument to operator ${t.text}`
+            tokens.splice(ci, 2, { 
+              type: 'op', 
+              text: t.text+next().text, 
+              bound: [next()], 
+              opdef: t.opdef })
             break
 
           case 'postop': 
-            if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
-            tokens = [
-              ...tokens.slice(0, ci-1), 
-              { type: 'op', 
-                text: prev().text+t.text, 
-                bound: [prev()], 
-                opdef: t.opdef }, 
-              ...tokens.slice(ci+1)
-            ]
+            if(!prev()) throw `Expected left-hand argument to operator ${t.text}`
+            tokens.splice(ci-1, 2, { 
+              type: 'op', 
+              text: prev().text+t.text, 
+              bound: [prev()], 
+              opdef: t.opdef })
             break
 
           case 'binop': 
-            if(!prev()) throw `Expected left-hand argument to operator ${curr().text}`
-            if(!next()) throw `Expected right-hand argument to operator ${curr().text}`
-            tokens = [
-              ...tokens.slice(0, ci-1), 
-              { type: 'op', 
-                text: prev().text+t.text+next().text, 
-                bound: [prev(), next()], 
-                opdef: t.opdef }, 
-              ...tokens.slice(ci+2)
-            ]
+            if(!prev()) throw `Expected left-hand argument to operator ${t.text}`
+            if(!next()) throw `Expected right-hand argument to operator ${t.text}`
+            tokens.splice(ci-1, 3, { 
+              type: 'op', 
+              text: prev().text+t.text+next().text, 
+              bound: [prev(), next()], 
+              opdef: t.opdef })
             break
         }
       }
