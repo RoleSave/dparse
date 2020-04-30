@@ -1,6 +1,5 @@
 import describe, { testConsistency } from "gruetest"
-import { Expr, parseExpr, parseExprList } from "../index"
-import { Group } from "../core/operators"
+import { Expr, parseExpr, parseExprList, Group } from "../index"
 
 describe('Expression system', it => {
   it('should properly parse/eval basic expressions', assert => {
