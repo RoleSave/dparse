@@ -1,5 +1,4 @@
 import { Op } from './operators'
-import { randOf } from '../util/functions'
 
 /// SECTION: Results
 
@@ -86,16 +85,6 @@ export class Const extends Expr {
   }
 }
 
-/** A parenthesised expression. */
-export class Group extends Expr {
-  constructor(/** The expression inside the parens. */ readonly contains: Expr) { super(contains.cacheable) }
-
-  toString(ctx?: ExprCtx) { return `(${this.contains.toString(ctx)})` }
-  protected performEval(ctx: ExprCtx): Result {
-    return this.contains.eval(ctx)
-  }
-}
-
 /** A variable to be pulled from `ExprCtx` at eval time. */
 export class Variable extends Expr {
   constructor(/** The name of the variable. */ readonly name: string) { super(false) }
@@ -104,31 +93,5 @@ export class Variable extends Expr {
   protected performEval(ctx: ExprCtx): Result {
     let val = ctx[this.name]?.eval(ctx)
     return { type: 'basic', source: this, value: val?.value || NaN, prev: [val] }
-  }
-}
-
-/** Randomly select from a list. */
-export class RandFromList extends Expr {
-  constructor(/** The list. */ readonly list: Expr[]) { super(false) }
-
-  toString(ctx?: ExprCtx) { return `[${this.list.map(e => e.toString(ctx)).join(', ')}]` }
-  protected performEval(ctx: ExprCtx): Result {
-    return randOf(this.list).eval(ctx)
-  }
-}
-
-/** Randomly select from a list, removing selected options. */
-export class TakeFromList extends Expr {
-  private readonly stringRep?: string
-  constructor(/** The list. */ readonly list: Expr[]) { 
-    super(false) 
-    this.stringRep = this.toString()
-  }
-
-  toString(ctx?: ExprCtx) { return this.stringRep || `{${this.list.map(e => e.toString(ctx)).join(', ')}}` }
-  protected performEval(ctx: ExprCtx): Result {
-    let expr = this.list.length ? randOf(this.list) : new Const(NaN)
-    this.list.splice(this.list.indexOf(expr), 1)
-    return expr.eval(ctx)
   }
 }

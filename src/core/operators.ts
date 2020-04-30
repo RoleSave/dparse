@@ -1,10 +1,11 @@
-import { Result, ExprCtx, Expr, Const } from "./expressions"
+import { Result, ExprCtx, Expr } from "./expressions"
 
 /// SECTION: Operators
 
 /** (internal) Operator-related registry and utility functions. */
 class OperatorReg {
   private readonly opRegistry: {[k:string]: OpDef} = {}
+  private readonly groupRegistry: {[k:string]: GroupDef} = {}
   private highprec = 0
   private lowprec = 0
 
@@ -17,6 +18,17 @@ class OperatorReg {
     this.opRegistry[op.name] = op 
     this.highprec = Math.max(this.highprec, op.prec)
     this.lowprec = Math.min(this.lowprec, op.prec)
+  }
+
+  /** Register a new group type. */
+  registerGroupType(grp: GroupDef, redefine: boolean = false) {
+    if(!redefine && this.groupRegistry[grp.name])
+      throw `Attempted to redefine group type ${grp.name}; please change the type's name or set the 'redefine' flag as true in your call to registerGroupType`
+    if(this.getGroupList().filter(g=>g.name!==grp.name).map(g=>g.open).includes(grp.open))
+      throw `Attempted to define group type ${grp.name} with conflicting opening text representation ${grp.open}`
+    if(this.getGroupList().filter(g=>g.name!==grp.name).map(g=>g.close).includes(grp.close))
+      throw `Attempted to define group type ${grp.name} with conflicting closing text representation ${grp.close}`
+    this.groupRegistry[grp.name] = grp
   }
 
   /** Get the highest registered operator precedence. */
@@ -33,6 +45,10 @@ class OperatorReg {
   getOpsForPrec(prec: number): OpDef[] { 
     return this.getOpList().filter(op => op.prec == prec) 
   }
+
+  /** Get a group type definition by name */
+  getGroup(name: string): GroupDef|undefined { return this.groupRegistry[name] }
+  getGroupList(): GroupDef[] { return Object.values(this.groupRegistry) }
   
   /** Returns true if the given `Expr` is an `Op`. */
   isOp(expr: Expr): expr is Op { return expr instanceof PostOp || expr instanceof BinOp }
@@ -47,6 +63,8 @@ class OperatorReg {
 /** Operator-related registry and utility functions. */
 export const Operators = new OperatorReg
 export default Operators
+
+/// SECTION: Operator types
 
 /** All data required to define a new operator. */
 export type OpDef = PreOpDef|PostOpDef|BinOpDef
@@ -158,9 +176,62 @@ export class BinOp extends Expr {
     let l = this.lhs.eval(ctx),
         r = this.rhs.eval(ctx)
     if(this.def.requireTypeL && this.def.requireTypeL !== l.type)
-      throw `Cannot perform op ${this.def.text} on result of type ${l.type} (left hand side, ${l.source})`
+      throw `Cannot perform op ${this.def.name} on result of type ${l.type} (left hand side, ${l.source})`
     if(this.def.requireTypeR && this.def.requireTypeR !== r.type)
-      throw `Cannot perform op ${this.def.text} on result of type ${r.type} (right hand side, ${r.source})`
+      throw `Cannot perform op ${this.def.name} on result of type ${r.type} (right hand side, ${r.source})`
     return this.def.eval(this, l, r, ctx)
+  }
+}
+
+/// SECTION: Group types
+
+/** All data required to define a new operator. */
+export type GroupDef = {
+  /** The internal name of the group type. Must be unique. */
+  name: string
+  /** The parsed opening text of the group. */
+  open: string
+  /** The parsed closing text of the group. */
+  close: string
+  /** The maximum number of expressions contained by this group. If not present, assumed to be infinite. */
+  maxContents?: number
+  /** If present, throws an error if a contained expression returns the wrong type of `Result`. */
+  requireType?: Result['type']
+
+  /** An optional override for how this group is represented by `toString`. If not present, `open` is used. */
+  openDisplay?: string
+  /** An optional override for how this group is represented by `toString`. If not present, `close` is used. */
+  closeDisplay?: string
+  /** Whether the contents of this list should be cached for display on creation. If not present, assumes false. */
+  cacheContentDisplay?: boolean
+  /** Whether the results of this group can be cached if its operands are cacheable. If not present, assumes false. */
+  cacheable?: boolean
+
+  /** The body of the operator. */
+  eval: (grp: Group, contents: Result[], ctx: ExprCtx) => Result
+}
+
+export class Group extends Expr {
+  private readonly toString_cached?: string
+
+  constructor(
+    readonly def: GroupDef,
+    readonly contents: Expr[]
+  ) { 
+    super(!!def.cacheable && contents.reduce<boolean>((a,b) => a && !!b.cacheable, true))
+    if(typeof def.maxContents !== 'undefined' && contents.length > def.maxContents)
+      throw `Groups of type ${this.def.name} can only contain up to ${def.maxContents} expression${def.maxContents !== 1 ? 's' : ''}`
+    if(def.cacheContentDisplay) this.toString_cached = this.toString()
+  }
+
+  toString(ctx?: ExprCtx) { return this.toString_cached ?? 
+    `${this.def.openDisplay ?? this.def.open}${this.contents.map(e=>e.toString(ctx)).join(', ')}${this.def.closeDisplay ?? this.def.close}` }
+
+  performEval(ctx: ExprCtx) {
+    let results = this.contents.map(e => e.eval(ctx))
+    if(this.def.requireType && !results.every(r => r.type === this.def.requireType))
+      throw `Cannot evaluate group ${this.def.name} with contained expression not of type ${this.def.requireType}`
+
+    return this.def.eval(this, results, ctx)
   }
 }

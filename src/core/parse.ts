@@ -1,5 +1,5 @@
-import { Expr, Group, Const, Variable, RandFromList, TakeFromList } from "./expressions";
-import { Operators, OpDef, PreOp, PreOpDef, PostOp, PostOpDef, BinOp, BinOpDef } from './operators'
+import { Expr, Const, Variable } from "./expressions";
+import { Operators, OpDef, PreOp, PreOpDef, PostOp, PostOpDef, BinOp, BinOpDef, GroupDef, Group } from './operators'
 
 /// SECTION: Definitions
 
@@ -7,6 +7,7 @@ type Token = {
   type: 'const'|'var'|'open'|'close'|'sep'|'group'|'op'
   text: string
   opdef?: OpDef
+  grpdef?: GroupDef
   bound?: Token[]
 }
 
@@ -30,18 +31,12 @@ function lex(expr: string): Token[] {
 
   lex: while(c = from[0]) {
     from = from.slice(1)
-    if(/\s/.test(c)) continue lex
 
-    // Brackets
-    if(/[\(\[\{]/.test(c)) {
-      tokens.push({ type: 'open', text: c })
-      continue lex }
-    if(/[\)\]\}]/.test(c)) {
-      tokens.push({ type: 'close', text: c })
-      continue lex }
+    if(/\s/.test(c)) continue lex
     if(c === ',') {
       tokens.push({ type: 'sep', text: c })
-      continue lex }
+      continue lex 
+    }
 
     // Negative numbers
     // TODO: Find a way to implement this as a preop instead of a parser exception
@@ -79,6 +74,23 @@ function lex(expr: string): Token[] {
       }
     }
 
+    // Groups
+    for(let grp of Operators.getGroupList().sort((a,b) => b.open.length - a.open.length)) {
+      if((c+from).startsWith(grp.open.toLowerCase())) {
+        from = from.slice(grp.open.length-1)
+        tokens.push({ type: 'open', text: grp.open, grpdef: grp })
+        continue lex
+      }
+    }
+
+    for(let grp of Operators.getGroupList().sort((a,b) => b.close.length - a.close.length)) {
+      if((c+from).startsWith(grp.close.toLowerCase())) {
+        from = from.slice(grp.close.length-1)
+        tokens.push({ type: 'close', text: grp.close, grpdef: grp })
+        continue lex
+      }
+    }
+
     // Unknown character
     throw `Unexpected token ${c} when parsing ${expr}`
   }
@@ -106,8 +118,8 @@ function collapse(tokens: Token[]): Token[] {
     if(t.type == 'close') throw `Unexpected token ${t.text} when parsing ${tokens.map(t=>t.text).join('')}`
     if(t.type == 'open') {
       let nest = 0, cont = [], open = ci,
-          openText = tokens[open].text,
-          closeText = matchParen[tokens[open].text]
+          openText = tokens[open].grpdef!.open,
+          closeText = tokens[open].grpdef!.close
       while(t = next()) {
         if(t.type == 'open' && t.text === openText) nest++
         if(t.type == 'close' && t.text === closeText) nest--
@@ -117,10 +129,12 @@ function collapse(tokens: Token[]): Token[] {
       }
   
       if(nest >= 0) throw `Unexpected EOF when parsing ${tokens.map(t=>t.text).join('')}; expected ${closeText}`
+      if(!cont.length) throw `Empty groups are not allowed`
       tokens.splice(open, cont.length+2, {
         type: 'group',
         text: `${openText}${cont.map(t=>t.text).join('')})${closeText}`, 
-        bound: collapse(cont) })
+        bound: collapse(cont),
+        grpdef: tokens[open].grpdef })
       ci = open+1
     } else advance()
   } reset()
@@ -174,18 +188,7 @@ function collapse(tokens: Token[]): Token[] {
 function convert(ast: Token): Expr {
   if(ast.type == 'const') return new Const(parseInt(ast.text, 10))
   if(ast.type == 'var') return new Variable(ast.text)
-  
-  if(ast.type == 'group') switch(ast.text[0]) {
-    case '(':
-      if(ast.bound?.length !== 1) throw `Expected one bound token in () group`
-      return new Group(convert(ast.bound![0]))
-    case '[':
-      if(!ast.bound?.length) throw `Expected at least one bound token in [] group`
-      return new RandFromList(ast.bound.map(convert))
-    case '{':
-      if(!ast.bound?.length) throw `Expected at least one bound token in {} group`
-      return new TakeFromList(ast.bound.map(convert))
-  }
+  if(ast.type == 'group') return new Group(ast.grpdef!, ast.bound!.map(convert))
 
   if(ast.type == 'op') {
     if(!ast.bound?.length) throw `Encountered unbound operator ${ast.text}`

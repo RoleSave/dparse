@@ -1,6 +1,6 @@
 import describe, { testConsistency } from "gruetest"
 import { Expr, parseExpr, parseExprList } from "../index"
-import { TakeFromList } from "../core/expressions"
+import { Group } from "../core/operators"
 
 describe('Expression system', it => {
   it('should properly parse/eval basic expressions', assert => {
@@ -95,9 +95,9 @@ describe('Expression system', it => {
       assert.inArray(result.value, arr, 'sellist eval')
     })
 
-    while((takeList as TakeFromList).list.length > 0) {
+    while((takeList as Group).contents.length > 0) {
       assert.inArray(takeList.eval().value, arr, 'takelist eval')
-      arr = (takeList as TakeFromList).list.map(e => e.eval().value)
+      arr = (takeList as Group).contents.map(e => e.eval().value)
     }
 
     assert.equal(takeList.toString(), '{15, 14, 13, 12, 10, 8}', 'takelist parse after')
@@ -210,16 +210,20 @@ describe('Expression system', it => {
   })
 
   it('should throw expected parser errors', assert => {
-    assert.throws(() => parseExpr('$'), e => e === 'Expected variable name after $')
-    assert.throws(() => parseExpr('asdfasdf'), e => e === 'Unexpected token a when parsing asdfasdf')
+    assert.throws(() => parseExpr('$'), e => e === 'Expected variable name after $', 'expected varname')
+    assert.throws(() => parseExpr('asdfasdf'), e => e === 'Unexpected token a when parsing asdfasdf', 'unexpected token')
+    assert.throws(() => parseExpr('2,2'), e => e === 'Expected only one expression', 'unexpected list')
 
-    assert.throws(() => parseExpr(''), e => e === 'Cannot parse empty expression')
-    assert.throws(() => parseExpr('('), e => e === 'Unexpected EOF when parsing (; expected )')
-    assert.throws(() => parseExpr(')'), e => e === 'Unexpected token ) when parsing )')
-    assert.throws(() => parseExpr('2+2 2+2'), e => e === 'Expected operator between tokens 2 and 2')
+    assert.throws(() => parseExpr(''), e => e === 'Cannot parse empty expression', 'empty expression')
+    assert.throws(() => parseExpr('('), e => e === 'Unexpected EOF when parsing (; expected )', 'unclosed group')
+    assert.throws(() => parseExpr(')'), e => e === 'Unexpected token ) when parsing )', 'unexpected close')
+    assert.throws(() => parseExpr('2+2 2+2'), e => e === 'Expected operator between tokens 2 and 2', 'adjacent consts')
 
-    assert.throws(() => parseExpr('adv'), e => e === 'Expected left-hand argument to operator adv')
-    assert.throws(() => parseExpr('dc10'), e => e === 'Expected left-hand argument to operator dc')
-    assert.throws(() => parseExpr('10dc'), e => e === 'Expected right-hand argument to operator dc')
+    assert.throws(() => parseExpr('adv'), e => e === 'Expected left-hand argument to operator adv', 'postop lh missing')
+    assert.throws(() => parseExpr('dc10'), e => e === 'Expected left-hand argument to operator dc', 'binop lh missing')
+    assert.throws(() => parseExpr('10dc'), e => e === 'Expected right-hand argument to operator dc', 'binop rh missing')
+
+    assert.throws(() => parseExpr('()'), e => e === 'Empty groups are not allowed', 'empty group')
+    assert.throws(() => parseExpr('(2,2)'), e => e === 'Groups of type grouping can only contain up to 1 expression', 'overfull group')
   })
 })
