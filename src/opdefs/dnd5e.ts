@@ -32,7 +32,7 @@ Operators.registerOp({
   eval: (op, l, r) => ({
     ...l, source: op, prev: [ l, r ],
     statuses: [
-      ...l.statuses||[], ...r.statuses||[],
+      ...l.statuses??[], ...r.statuses??[],
       { fromOp: op.def.name,
         text: l.value >= r.value ? 'Pass' : 'Fail' }
     ]
@@ -54,7 +54,7 @@ Operators.registerOp({
     let effect; return {
       ...l, source: op, prev: [ l ],
       statuses: [
-        ...l.statuses||[],
+        ...l.statuses??[],
         { fromOp: op.def.name,
           text: (effect = randOf(wildMagicEffects)).replace(/[{}]/g,''),
           results: effect.match(/\{(.+)\}/g)?.map(m => parseExpr(m.slice(1,-1)).eval()) }

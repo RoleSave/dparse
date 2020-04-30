@@ -92,6 +92,6 @@ export class Variable extends Expr {
   toString(ctx?: ExprCtx) { return ctx?.[this.name] ? `(${ctx[this.name].toString(ctx)})` : `\$${this.name};` }
   protected performEval(ctx: ExprCtx): Result {
     let val = ctx[this.name]?.eval(ctx)
-    return { type: 'basic', source: this, value: val?.value || NaN, prev: [val] }
+    return { type: 'basic', source: this, value: val?.value ?? NaN, prev: [val] }
   }
 }
