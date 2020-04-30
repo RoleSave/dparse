@@ -1,10 +1,10 @@
-import { Expr, Group, Const, Variable } from "./expressions";
+import { Expr, Group, Const, Variable, RandFromList, TakeFromList } from "./expressions";
 import { Operators, OpDef, PreOp, PreOpDef, PostOp, PostOpDef, BinOp, BinOpDef } from './operators'
 
 /// SECTION: Definitions
 
 type Token = {
-  type: 'const'|'var'|'open'|'close'|'group'|'op'
+  type: 'const'|'var'|'open'|'close'|'sep'|'group'|'op'
   text: string
   opdef?: OpDef
   bound?: Token[]
@@ -12,12 +12,14 @@ type Token = {
 
 /** Parse a single expression. */
 export function parseExpr(expr: string): Expr {
-  return convert(collapse(lex(expr)))
+  let [ast,_] = collapse(lex(expr))
+  if(_) throw `Expected only one expression`
+  return convert(ast)
 }
 
 /** Parse a comma-separated list of expressions. */
 export function parseExprList(exprs: string): Expr[] {
-  return exprs.split(',').filter(x=>x.trim()).map(parseExpr)
+  return collapse(lex(exprs)).map(convert)
 }
 
 /// SECTION: Lex
@@ -31,11 +33,14 @@ function lex(expr: string): Token[] {
     if(/\s/.test(c)) continue lex
 
     // Brackets
-    if(/[\(]/.test(c)) { // TODO: [{
+    if(/[\(\[\{]/.test(c)) {
       tokens.push({ type: 'open', text: c })
       continue lex }
-    if(/[\)]/.test(c)) { // TODO: ]}
+    if(/[\)\]\}]/.test(c)) {
       tokens.push({ type: 'close', text: c })
+      continue lex }
+    if(c === ',') {
+      tokens.push({ type: 'sep', text: c })
       continue lex }
 
     // Negative numbers
@@ -85,7 +90,7 @@ function lex(expr: string): Token[] {
 }
 
 /// SECTION: Build AST
-function collapse(tokens: Token[]): Token {
+function collapse(tokens: Token[]): Token[] {
   if(tokens.length < 1) throw `Cannot parse empty expression`
 
   // Program counters and helper functions
@@ -115,7 +120,7 @@ function collapse(tokens: Token[]): Token {
       tokens.splice(open, cont.length+2, {
         type: 'group',
         text: `${openText}${cont.map(t=>t.text).join('')})${closeText}`, 
-        bound: [collapse(cont)] })
+        bound: collapse(cont) })
       ci = open+1
     } else advance()
   } reset()
@@ -162,15 +167,25 @@ function collapse(tokens: Token[]): Token {
     } reset()
   }
 
-  if(tokens.length > 1) throw `Could not reduce expression ${tokens.map(t=>t.text).join('')} to a single base node`
-  return tokens[0]
+  return tokens.filter(t => t.type !== 'sep')
 }
 
 /// SECTION: Parse AST into expression
 function convert(ast: Token): Expr {
-  if(ast.type == 'group') return new Group(convert(ast.bound![0]))
   if(ast.type == 'const') return new Const(parseInt(ast.text, 10))
   if(ast.type == 'var') return new Variable(ast.text)
+  
+  if(ast.type == 'group') switch(ast.text[0]) {
+    case '(':
+      if(ast.bound?.length !== 1) throw `Expected one bound token in () group`
+      return new Group(convert(ast.bound![0]))
+    case '[':
+      if(!ast.bound?.length) throw `Expected at least one bound token in [] group`
+      return new RandFromList(ast.bound.map(convert))
+    case '{':
+      if(!ast.bound?.length) throw `Expected at least one bound token in {} group`
+      return new TakeFromList(ast.bound.map(convert))
+  }
 
   if(ast.type == 'op') {
     if(!ast.bound?.length) throw `Encountered unbound operator ${ast.text}`

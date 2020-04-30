@@ -1,4 +1,5 @@
 import { Op } from './operators'
+import { randOf } from '../util/functions'
 
 /// SECTION: Results
 
@@ -106,3 +107,28 @@ export class Variable extends Expr {
   }
 }
 
+/** Randomly select from a list. */
+export class RandFromList extends Expr {
+  constructor(/** The list. */ readonly list: Expr[]) { super(false) }
+
+  toString(ctx?: ExprCtx) { return `[${this.list.map(e => e.toString(ctx)).join(', ')}]` }
+  protected performEval(ctx: ExprCtx): Result {
+    return randOf(this.list).eval(ctx)
+  }
+}
+
+/** Randomly select from a list, removing selected options. */
+export class TakeFromList extends Expr {
+  private readonly stringRep?: string
+  constructor(/** The list. */ readonly list: Expr[]) { 
+    super(false) 
+    this.stringRep = this.toString()
+  }
+
+  toString(ctx?: ExprCtx) { return this.stringRep || `{${this.list.map(e => e.toString(ctx)).join(', ')}}` }
+  protected performEval(ctx: ExprCtx): Result {
+    let expr = this.list.length ? randOf(this.list) : new Const(NaN)
+    this.list.splice(this.list.indexOf(expr), 1)
+    return expr.eval(ctx)
+  }
+}

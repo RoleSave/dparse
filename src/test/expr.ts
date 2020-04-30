@@ -1,5 +1,6 @@
 import describe, { testConsistency } from "gruetest"
 import { Expr, parseExpr, parseExprList } from "../index"
+import { TakeFromList } from "../core/expressions"
 
 describe('Expression system', it => {
   it('should properly parse/eval basic expressions', assert => {
@@ -82,6 +83,26 @@ describe('Expression system', it => {
     assert.equal(modify.eval({ test: 4 }).value, 7, 'modify eval')
     assert.inRange(asdie1.eval({ test: 4 }).value, 4, 24, 'asdie1 eval')
     assert.inRange(asdie2.eval({ test: 4 }).value, 4, 24, 'asdie2 eval')
+  })
+
+  it('should properly parse/eval list selection', assert => {
+    let [slctList,takeList] = parseExprList('[15,14,13,12,10,8], {15,14,13,12,10,8}')
+    assert.equal(slctList.toString(), '[15, 14, 13, 12, 10, 8]', 'slctlist parse')
+    assert.equal(takeList.toString(), '{15, 14, 13, 12, 10, 8}', 'slctlist parse')
+
+    let arr = [15,14,13,12,10,8]
+    testConsistency(() => slctList.eval(), result => {
+      assert.inArray(result.value, arr, 'sellist eval')
+    })
+
+    while((takeList as TakeFromList).list.length > 0) {
+      assert.inArray(takeList.eval().value, arr, 'takelist eval')
+      arr = (takeList as TakeFromList).list.map(e => e.eval().value)
+    }
+
+    assert.equal(takeList.toString(), '{15, 14, 13, 12, 10, 8}', 'takelist parse after')
+    assert.equal(arr.length, 0, 'takelist length after')
+    assert.matchPred(takeList.eval().value, isNaN, 'takelist eval after')
   })
 
   it('should properly parse/eval dice notation', assert => {
