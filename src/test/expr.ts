@@ -223,6 +223,6 @@ describe('Expression system', it => {
     assert.throws(() => parseExpr('10dc'), e => e === 'Expected right-hand argument to operator dc', 'binop rh missing')
 
     assert.throws(() => parseExpr('()'), e => e === 'Empty groups are not allowed', 'empty group')
-    assert.throws(() => parseExpr('(2,2)'), e => e === 'Groups of type grouping can only contain up to 1 expression', 'overfull group')
+    assert.throws(() => parseExpr('(2,2)'), e => e === 'Groups of type parens can only contain up to 1 expression', 'overfull group')
   })
 })
